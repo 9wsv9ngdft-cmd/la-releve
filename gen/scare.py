@@ -28,6 +28,3 @@ p = im.crop((cx-150, top-90, cx+150, top+210)).resize((640,640))
 p = ImageEnhance.Brightness(p).enhance(0.45)
 p.save(f'{OUT}/15_profil_noir.jpg', quality=85)
 
-# Base de la porte personnalisée (le prénom est gravé par la console)
-frame(6.5, '/tmp/d65.jpg')
-Image.open('/tmp/d65.jpg').save(f'{OUT}/12_porte_base.jpg', quality=88)
