@@ -77,6 +77,9 @@
   .b.go{background:#12361d;border-color:var(--accent)}
   .b.red{background:#3d1010;border-color:var(--danger)}
   .b.ok{background:var(--accent);border-color:var(--accent);color:#fff}
+  .step.scare{border-left:4px solid var(--danger)}
+  .burst{display:flex;gap:6px;align-items:center;margin-top:6px}
+  .burst .bubble{flex:1;padding:6px 10px}
   .thumb{display:block;max-width:100%;max-height:220px;border-radius:8px;margin-top:8px;border:1px solid var(--line)}
   .missing{margin-top:8px;font-size:13px;color:var(--warn)}
 
@@ -217,6 +220,7 @@ function fill(t, html){
   let out = esc(t || '');
   out = out.replace(/\{,P\}/g, name ? ', ' + tok(esc(name)) : (html ? tok(', [prénom]') : ''));
   out = out.replace(/\{,L\}/g, (S.given && name) ? ', ' + tok(esc(name)) : '');
+  out = out.replace(/\{L\}/g, (S.given && name) ? tok(esc(name)) : '');
   out = out.replace(/\{P\}/g, name ? tok(esc(name)) : tok('[prénom]'));
   out = out.replace(/\{e\}/g, S.agree ? tok(S.agree) : '');
   return out;
@@ -290,7 +294,7 @@ setInterval(tick, 500);
 
 /* ------------------------------------------------------------- conducteur */
 const visibleSteps = () => STEPS.filter(s => !(s.onlyIfNameHidden && S.given));
-const MAIN = ['1','2','2b','3','4','5','6','7','8','8b','9','9b','10','11','11b','12','13','13bis','14','15','16'];
+const MAIN = ['1','2','2b','3','4','5','6','7','7b','7c','8','8b','9','9b','10','11','11b','11c','12','13','13bis','13c','13d','14','15','15b','16'];
 function nextId(){
   const fins = ['F1','F2','F3','F4'];
   if (fins.some(f => S.done[f])) return S.done['REV'] ? null : 'REV';
@@ -309,7 +313,7 @@ function renderSteps(){
     if (s.act !== act){ act=s.act; branch=null; const h=document.createElement('h2'); h.textContent=ACTS[act]; box.appendChild(h); }
     if (s.branch !== branch){ branch=s.branch; if(branch){ const h=document.createElement('div'); h.className='branch'; h.textContent = branch==='G' ? '↳ Branche A — la grille (salle 14) : piège' : '↳ Branche B — le quai (salle 3) : bonne sortie'; box.appendChild(h);} }
     const el=document.createElement('div');
-    el.className='step'+(S.done[s.id]&&!s.repeat?' done':'')+(s.id===next?' next':'');
+    el.className='step'+(S.done[s.id]&&!s.repeat?' done':'')+(s.id===next?' next':'')+(s.scare?' scare':'');
     el.id='s-'+s.id;
     const whoLbl={leo:'Léo',intrus:'Intrus',mj:'MJ',call:'Appel'}[s.who];
     el.innerHTML=`<div class="sh"><span class="who ${s.who}">${whoLbl}</span><div class="st"><b>${s.id} · ${s.title}</b><small>${s.time}${s.ending?' · fin '+s.ending:''}${s.enigma?' · 🧩 '+s.enigma.replace('E','É'):''}</small></div><button class="chk">${S.done[s.id]&&!s.repeat?'✓':''}</button></div><div class="body"></div>`;
@@ -329,10 +333,28 @@ function renderSteps(){
     } else if (s.media){
       const d=document.createElement('div'); d.className='note'; d.innerHTML='📎 <code>'+s.media+'</code>'; body.appendChild(d);
     }
+    if (s.burst){
+      s.burst.forEach(line=>{
+        const plain=fill(line); if(!plain.trim()) return;
+        const r=document.createElement('div'); r.className='burst';
+        const b=document.createElement('div'); b.className='bubble'; b.innerHTML=fill(line,true);
+        const c=document.createElement('button'); c.className='b go'; c.textContent='📋'; c.onclick=()=>copy(plain);
+        r.append(b,c); body.appendChild(r);
+      });
+    }
+    if (s.custom==='door'){
+      const cv=document.createElement('canvas'); cv.className='thumb'; cv.width=720; cv.height=1280; body.appendChild(cv);
+      drawDoor(cv);
+      const ab=document.createElement('div'); ab.className='acts';
+      const g=document.createElement('button'); g.className='b'; g.textContent='🔄 Regraver'; g.onclick=()=>drawDoor(cv);
+      const sh=document.createElement('button'); sh.className='b red'; sh.textContent='📤 Partager l\'image'; sh.onclick=()=>shareCanvas(cv,'IMG_'+(4000+Math.floor(Math.random()*999))+'.jpg');
+      ab.append(g,sh); body.appendChild(ab);
+    }
     if (s.note){ const n=document.createElement('div'); n.className='note'; n.textContent='💡 '+s.note; body.appendChild(n); }
     if (s.after){
       const a=document.createElement('div'); a.className='after';
-      a.innerHTML=`<small>Puis ${s.after.wait} — Intrus :</small><div class="bubble intrus">${fill(s.after.text,true)}</div>`;
+      const aw={leo:'Léo',intrus:'Intrus'}[s.after.who]||'';
+      a.innerHTML=`<small>Puis ${s.after.wait} — ${aw} :</small><div class="bubble${s.after.text.startsWith('```')?' intrus':''}">${fill(s.after.text,true)}</div>`;
       const ab=document.createElement('div'); ab.className='acts';
       const c=document.createElement('button'); c.className='b'; c.textContent='📋 Copier'; c.onclick=()=>copy(fill(s.after.text)); ab.appendChild(c);
       a.appendChild(ab); body.appendChild(a);
@@ -364,6 +386,59 @@ function toggleDone(s){
 function scrollNext(){ const n=nextId(); const el=n && $('s-'+n); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 function startGame(){ if(!S.start){ S.start=Date.now(); save(); } toast('Partie démarrée à '+hhmm()); scrollNext(); }
 function goReveal(){ showPage('run'); const el=$('s-REV'); el.classList.remove('done'); el.scrollIntoView({behavior:'smooth'}); }
+
+/* ------------------------------------------------------------- porte gravée (prénom) */
+const doorImg = new Image(); doorImg.src = mediaUrl('12_porte_base.jpg');
+function drawDoor(cv){
+  const ctx = cv.getContext('2d');
+  const go = () => {
+    ctx.drawImage(doorImg, 0, 0, cv.width, cv.height);
+    const name = (S.name.trim() || 'PRÉNOM').toUpperCase();
+    const FONT = s => `${s}px "Marker Felt", Chalkduster, "Comic Sans MS", "Comic Relief", cursive`;
+    const scratch = (txt, cx, cy, maxW, size, rot) => {
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+      let fs = size; ctx.font = FONT(fs);
+      while (ctx.measureText(txt).width > maxW && fs > 20){ fs -= 4; ctx.font = FONT(fs); }
+      ctx.textBaseline = 'middle';
+      let x = -ctx.measureText(txt).width / 2;
+      for (const ch of txt){
+        const w = ctx.measureText(ch).width;
+        ctx.save(); ctx.translate(x + w/2 + (Math.random()-.5)*4, (Math.random()-.5)*8); ctx.rotate((Math.random()-.5)*0.25);
+        ctx.font = FONT(fs * (0.9 + Math.random()*0.2)); ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(15,10,8,.45)'; ctx.fillText(ch, 2, 3);
+        ctx.fillStyle = `rgba(228,222,212,${0.45+Math.random()*0.2})`; ctx.fillText(ch, 0, 0);
+        for (let i = 0; i < 6; i++){
+          const l = 190 + Math.random()*50;
+          ctx.strokeStyle = `rgba(${l},${l-8},${l-18},${0.25 + Math.random()*0.35})`;
+          ctx.lineWidth = 0.6 + Math.random()*1.4;
+          ctx.strokeText(ch, (Math.random()-.5)*3, (Math.random()-.5)*3);
+        }
+        ctx.restore(); x += w;
+      }
+      ctx.restore();
+    };
+    // rayures parasites
+    for (let i = 0; i < 14; i++){
+      const x = 200 + Math.random()*320, y = 620 + Math.random()*360, len = 20 + Math.random()*70, an = (Math.random()-.5)*1.2;
+      ctx.strokeStyle = `rgba(220,215,205,${0.15+Math.random()*0.25})`; ctx.lineWidth = 0.6 + Math.random();
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(an)*len, y + Math.sin(an)*len); ctx.stroke();
+    }
+    scratch(name, 352, 760, 300, 120, -0.06 + Math.random()*0.04);
+    scratch('JE TE VOIS', 352, 900, 280, 60, 0.05 - Math.random()*0.04);
+    const vg = ctx.createRadialGradient(360, 700, 200, 360, 700, 760);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.6)');
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, cv.width, cv.height);
+  };
+  if (doorImg.complete && doorImg.naturalWidth) go(); else doorImg.onload = () => renderSteps();
+}
+async function shareCanvas(cv, filename){
+  const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.88));
+  const f = new File([blob], filename, { type:'image/jpeg' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files:[f] })) { await navigator.share({ files:[f] }); return; }
+  } catch(e){ if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+}
 
 /* ------------------------------------------------------------- énigmes / impro */
 function renderEnigmas(){
