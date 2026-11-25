@@ -186,8 +186,9 @@ const CHAPTERS = [
     await leo("bref");
     await sleep(9000);
     nappe.cut();
-    await leo('', { audio: 'ch4_coups', typingLabel: 'enregistre un audio…' });
-    await sleep(20000);
+    const vc = await leo('', { audio: 'ch4_coups', typingLabel: 'enregistre un audio…' });
+    await voiceDone(vc, 40000);        // la photo arrive après le vocal (29 s), pas pendant
+    await sleep(5000);
     await leo('', { img: 'vitre_sil', pair: 'vitre_vide' });
     await leo("tu vois quelquun toi ?");
     readMode('hold');
