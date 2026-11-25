@@ -9,11 +9,12 @@
 <meta name="apple-mobile-web-app-title" content="VEILLE" />
 <meta name="theme-color" content="#05080a" />
 <meta name="robots" content="noindex, nofollow" />
-<title>VEILLE · Télésurveillance</title>
+<title>VEILLE · Archives Nord</title>
 <style>
   :root{
-    --bg:#05080a; --panel:#0b1114; --panel2:#111a1f; --line:#1c2a30; --text:#d8e4e8; --muted:#6f858d;
-    --green:#38e08a; --amber:#f2b33d; --red:#ff4d4d; --leo:#16262d; --me:#0f3b2c; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --bg:#05080a; --panel:#0b1114; --panel2:#111a1f; --line:#1c2a30; --text:#d8e4e8; --muted:#6f858d; --dim:#4f6168;
+    --green:#38e08a; --amber:#f2b33d; --orange:#ff8a2a; --red:#ff4d4d; --leo:#16262d; --me:#0f3b2c;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;background:var(--bg);color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;overflow:hidden}
@@ -21,498 +22,906 @@
   input{font:inherit;font-size:16px;color:var(--text)}
   .hide{display:none!important}
 
-  /* ---------- écrans d'intro ---------- */
-  .screen{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding:calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));gap:18px;background:radial-gradient(ellipse at top,#0d1a1f,#05080a 70%);z-index:30;overflow-y:auto}
-  .logo{font-family:var(--mono);letter-spacing:6px;font-size:30px;font-weight:700;color:var(--green)}
-  .logo small{display:block;font-size:11px;letter-spacing:3px;color:var(--muted);font-weight:400;margin-top:4px}
-  .screen p{color:var(--muted);font-size:15px}
-  .screen h2{font-size:20px}
-  .warn{border:1px solid #4d2a10;background:#1a0f06;border-radius:12px;padding:14px;font-size:14px;color:#f3c78a;line-height:1.5}
-  .warn li{margin-left:18px}
-  .btn{background:var(--green);color:#03120a;font-weight:700;border-radius:12px;padding:15px;font-size:16px;text-align:center}
-  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
-  .field{display:flex;flex-direction:column;gap:6px}
-  .field label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono)}
-  .field input{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px}
-  .seg{display:flex;gap:6px}
-  .seg button{flex:1;padding:11px 4px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-size:14px}
-  .seg button.on{border-color:var(--green);color:var(--green)}
-  .calib{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
-  .calib video{width:64px;height:84px;object-fit:cover;border-radius:8px;background:#000;filter:grayscale(1) contrast(1.2)}
-  .calib .st{font-family:var(--mono);font-size:13px}
-  .ok{color:var(--green)} .ko{color:var(--red)}
+  /* ---------- portail (Ch. 0) ---------- */
+  #portal{position:fixed;inset:0;overflow-y:auto;background:#e9ecee;color:#1d2327;font:14px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;z-index:30;-webkit-overflow-scrolling:touch}
+  #portal .top{background:#23343d;color:#dfe7ea;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;font-family:var(--mono);font-size:11.5px;letter-spacing:1px}
+  #portal .top b{display:block;font-size:13px;letter-spacing:2px;color:#fff}
+  #portal .wrap{padding:14px 14px calc(30px + env(safe-area-inset-bottom));max-width:620px;margin:0 auto}
+  #portal .aff{background:#fff;border:1px solid #c9d1d5;border-left:4px solid #8a9aa2;padding:10px 12px;font-size:13px;margin-bottom:14px}
+  #portal fieldset{border:1px solid #c9d1d5;background:#fff;padding:12px;margin-bottom:12px;border-radius:2px}
+  #portal legend{font-weight:700;font-size:13px;padding:0 4px;color:#23343d}
+  #portal .row{margin:8px 0}
+  #portal .row > span{display:block;font-size:12px;color:#55626a;margin-bottom:4px}
+  #portal input[type=text]{width:100%;border:1px solid #aab5ba;background:#fafbfb;padding:9px;border-radius:2px;color:#1d2327}
+  #portal .opts{display:flex;flex-wrap:wrap;gap:6px}
+  #portal .opts button{border:1px solid #aab5ba;background:#f4f6f7;padding:7px 10px;border-radius:2px;font-size:13px;color:#1d2327}
+  #portal .opts button.on{background:#23343d;color:#fff;border-color:#23343d}
+  #portal .ck{display:flex;gap:9px;align-items:flex-start;margin:9px 0;font-size:12.5px;color:#333}
+  #portal .ck input{margin-top:3px;width:17px;height:17px;flex-shrink:0}
+  #portal .q{font-style:italic;color:#55626a;font-size:12.5px;margin-bottom:8px}
+  #portal .act{border:1px solid #23343d;background:#f4f6f7;color:#23343d;padding:9px 12px;border-radius:2px;font-size:13px;font-weight:600}
+  #portal .st{font-family:var(--mono);font-size:11.5px;color:#55626a;margin-top:6px}
+  #portal .st.ok{color:#1d7a46}
+  #portal .badgeph{width:66px;height:88px;object-fit:cover;filter:grayscale(1);border:1px solid #aab5ba;margin-top:8px;display:block}
+  #portal .go{display:block;width:100%;background:#23343d;color:#fff;font-weight:700;letter-spacing:2px;padding:14px;border-radius:2px;margin-top:6px;font-family:var(--mono)}
+  #portal .go:disabled{opacity:.45}
+  #portal .val{font-family:var(--mono);font-size:11px;color:#6b777d;margin-top:10px;min-height:16px}
+  #portal .foot{font-family:var(--mono);font-size:10.5px;color:#7c878c;margin-top:18px;border-top:1px solid #c9d1d5;padding-top:10px}
+  #portal .msg{background:#fff;border:1px solid #c9d1d5;padding:16px;font-family:var(--mono);font-size:12.5px;color:#23343d;margin:20px 0}
+  #portal .err{color:#a32020;font-size:12px;margin-top:8px;min-height:16px}
+  #seg{position:fixed;inset:0;z-index:45;background:#e9ecee;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center;color:#1d2327}
+  #seg.on{display:flex}
+  #seg .n{font-family:var(--mono);font-size:11px;color:#55626a;letter-spacing:2px}
+  #seg .t{font-size:24px;font-weight:600;max-width:340px}
+  #seg .lv{width:220px;height:8px;background:#c9d1d5;border-radius:4px;overflow:hidden}
+  #seg .lv i{display:block;height:100%;width:0;background:#23343d;transition:width .08s}
+  #seg .e{font-family:var(--mono);font-size:12px;color:#a32020;min-height:16px}
+  #photo{position:fixed;inset:0;z-index:45;background:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#333;font-size:13px}
+  #photo.on{display:flex}
+  #photo video{width:150px;height:200px;object-fit:cover;border-radius:50%;transform:scaleX(-1);background:#ddd}
 
-  /* ---------- appli principale ---------- */
+  /* ---------- appli ---------- */
   #app{position:fixed;inset:0;display:flex;flex-direction:column}
+  #app.frozen{pointer-events:none}
   .bar{padding:calc(8px + env(safe-area-inset-top)) 12px 8px;background:#070c0e;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px}
   .bar .t{flex:1;color:var(--muted);letter-spacing:1px}
   .bar .t b{color:var(--green);letter-spacing:3px;margin-right:6px}
   .rec{color:var(--red);animation:blink 1.2s infinite}
   @keyframes blink{50%{opacity:.2}}
-  .chrono{display:none;background:#3a0b0b;color:#fff;text-align:center;font-family:var(--mono);font-weight:700;padding:7px;letter-spacing:2px;animation:pulse 1s infinite}
-  @keyframes pulse{50%{background:#5e1010}}
+  .chrono{display:none;background:#2a0b0b;color:#f3dada;text-align:center;font-family:var(--mono);font-size:12px;padding:5px;letter-spacing:2px}
   .views{flex:1;position:relative;overflow:hidden}
   .view{position:absolute;inset:0;display:none;flex-direction:column}
   .view.on{display:flex}
-
-  /* interphone */
   .who{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--panel)}
   .av{width:38px;height:38px;border-radius:50%;background:#24343b center/cover;display:flex;align-items:center;justify-content:center;font-weight:700;color:#9fb4bb;flex-shrink:0}
   .who .n{font-weight:600}
   .who .s{font-size:12px;color:var(--muted);min-height:15px}
   .who .s.typing{color:var(--green)}
   .chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:7px;-webkit-overflow-scrolling:touch}
-  .m{max-width:84%;padding:8px 11px;border-radius:12px;word-wrap:break-word;animation:in .2s ease-out;font-size:15px}
-  @keyframes in{from{opacity:0;transform:translateY(6px)}}
-  .m.leo{align-self:flex-start;background:var(--leo);border-top-left-radius:3px}
+  .m{max-width:84%;padding:8px 11px;border-radius:12px;word-wrap:break-word;font-size:15px}
+  .m.leo,.m.faux{align-self:flex-start;background:var(--leo);border-top-left-radius:3px}
   .m.player{align-self:flex-end;background:var(--me);border-top-right-radius:3px}
-  .m.intrus{align-self:center;max-width:92%;background:#2a0707;border:1px solid var(--red);color:#ffbdbd;font-family:var(--mono);font-size:14px;text-align:center}
-  .m.intrus .tag{display:block;font-size:10px;letter-spacing:2px;color:var(--red);margin-bottom:3px}
-  .m.sys{align-self:center;max-width:94%;background:none;color:var(--amber);font-family:var(--mono);font-size:11.5px;text-align:center;padding:2px 6px;letter-spacing:.3px}
+  .m.log{align-self:center;max-width:96%;background:none;color:var(--dim);font-family:var(--mono);font-size:10.5px;text-align:center;padding:1px 4px;letter-spacing:.2px}
+  .m.direct{align-self:center;max-width:90%;background:none;border:1px solid #2a3a40;color:#c3cfd3;font-family:var(--mono);font-size:13px;text-align:center;border-radius:4px}
+  .m.direct .tag{display:block;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:3px}
+  .m.archive{align-self:center;max-width:80%;background:#0d1214;border:1px solid #2a3a40;border-radius:4px;padding:6px;font-family:var(--mono);font-size:10.5px;color:#8fa0a6;text-align:center}
+  .m.archive img,.m.archive .ph{width:100%;max-width:220px;display:block;margin:0 auto 6px;border-radius:2px}
+  .m.archive .ph{height:270px;background:#111}
   .m.deleted{font-style:italic;color:var(--muted)}
-  .m img,.m video{display:block;width:100%;max-width:250px;border-radius:8px;margin-bottom:4px}
-  .m audio{width:230px;max-width:100%;height:38px;display:block}
+  .m img{display:block;width:100%;max-width:250px;border-radius:8px;margin-bottom:4px}
   .m .tm{font-size:10px;color:rgba(216,228,232,.45);float:right;margin:4px 0 -2px 8px}
+  .rd{align-self:flex-end;font-size:10px;color:var(--dim);margin:-4px 3px 0 0;font-family:var(--mono)}
+  .vo{display:flex;align-items:center;gap:9px;min-width:190px;padding:2px 0}
+  .vo button{width:32px;height:32px;border-radius:50%;background:#2b4048;color:#d8e4e8;font-size:13px;flex-shrink:0}
+  .vo .wv{flex:1;height:22px;display:flex;align-items:center;gap:2px}
+  .vo .wv i{display:block;width:3px;border-radius:2px;background:#5d7780}
+  .vo .wv i.p{background:#cfe}
+  .vo .d{font-size:11px;color:var(--muted);font-family:var(--mono)}
   .choices{display:flex;flex-direction:column;gap:7px;align-self:stretch;margin:4px 0}
-  .choices button{border:1px solid var(--green);color:var(--green);border-radius:12px;padding:12px;font-weight:600;background:#07170f}
-  .doc-chip{align-self:center;border:1px solid var(--amber);color:var(--amber);border-radius:999px;padding:5px 12px;font-family:var(--mono);font-size:11.5px}
+  .choices button{border:1px solid #3c5058;color:#cfdade;border-radius:10px;padding:11px;font-weight:600;background:#0c1418}
+  .comfort{margin:0 10px 6px;border:1px solid #26353b;color:#6f858d;background:#0a1013;border-radius:6px;padding:7px;font-size:11.5px;font-family:var(--mono)}
   .input{display:flex;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#070c0e;border-top:1px solid var(--line)}
   .input input{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:22px;padding:10px 14px;outline:none}
+  .input input:disabled{opacity:.4}
   .input button{background:var(--green);color:#03120a;border-radius:22px;padding:0 16px;font-weight:700}
+  .input button:disabled{opacity:.3}
   .kpbtn{position:absolute;right:14px;bottom:calc(70px + env(safe-area-inset-bottom));background:var(--amber);color:#1a1000;font-weight:700;border-radius:999px;padding:11px 16px;font-family:var(--mono);box-shadow:0 6px 20px rgba(0,0,0,.6);z-index:5}
-
-  /* caméras */
-  .cams{flex:1;overflow-y:auto;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
-  .cam{position:relative;aspect-ratio:3/4;background:#000;border:1px solid var(--line);border-radius:6px;overflow:hidden}
-  .cam img{width:100%;height:100%;object-fit:cover;filter:grayscale(.85) contrast(1.15) brightness(.85)}
-  .cam .lbl{position:absolute;left:6px;top:6px;font-family:var(--mono);font-size:9.5px;color:#cfe;text-shadow:0 0 3px #000}
-  .cam .clk{position:absolute;right:6px;bottom:6px;font-family:var(--mono);font-size:9.5px;color:#cfe}
-  .cam .lost{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--red);background:#050505;letter-spacing:2px;text-align:center}
+  .cams{flex:1;overflow-y:auto;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start}
+  .cam{position:relative;aspect-ratio:4/3;background:#000;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .cam img{width:100%;height:100%;object-fit:cover;filter:grayscale(.6) contrast(1.1)}
+  .cam .lbl,.hud .l{position:absolute;left:6px;top:5px;font-family:var(--mono);font-size:8.5px;color:#d6eee2;text-shadow:0 0 3px #000}
+  .cam .clk{position:absolute;right:6px;bottom:5px;font-family:var(--mono);font-size:8.5px;color:#d6eee2;text-shadow:0 0 3px #000}
+  .cam .rc{position:absolute;right:6px;top:5px;font-family:var(--mono);font-size:8.5px}
+  .cam .lost{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:#9a5555;background:#050505;letter-spacing:2px;text-align:center}
   .cam.off .lost{display:flex}
-  .noise{position:absolute;inset:0;width:100%;height:100%;opacity:.13;mix-blend-mode:screen;pointer-events:none;image-rendering:pixelated}
-  .cam.off .noise{opacity:.35}
-
-  /* dossiers */
-  .docs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
-  .doc{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:left}
-  .doc img{width:64px;height:64px;object-fit:cover;border-radius:6px}
-  .doc b{display:block;font-size:14px}
-  .doc small{color:var(--muted);font-family:var(--mono);font-size:11px}
+  .noise{position:absolute;inset:0;width:100%;height:100%;opacity:.12;mix-blend-mode:screen;pointer-events:none;image-rendering:pixelated}
+  .cam.off .noise{opacity:.3}
+  .docs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .doc{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;text-align:left}
+  .doc .th{width:58px;height:58px;border-radius:4px;background:#0a0f10 center/cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--green)}
+  .doc b{display:block;font-size:13.5px}
+  .doc small{color:var(--muted);font-family:var(--mono);font-size:10.5px}
   .empty{color:var(--muted);text-align:center;margin-top:40px;font-family:var(--mono);font-size:12px}
-
-  /* onglets */
   .tabs{display:flex;background:#070c0e;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
   .tabs button{flex:1;padding:9px 0 8px;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--muted);position:relative}
   .tabs button.on{color:var(--green)}
-  .tabs button i{display:block;font-style:normal;font-size:18px;margin-bottom:2px}
-  .badge{position:absolute;top:5px;left:calc(50% + 8px);background:var(--red);color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;font-family:-apple-system,sans-serif}
+  .tabs button i{display:block;font-style:normal;font-size:17px;margin-bottom:2px}
+  .badge{position:absolute;top:5px;left:calc(50% + 8px);background:#7a2b2b;color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;font-family:-apple-system,sans-serif}
 
-  /* overlays */
+  /* ---------- superpositions ---------- */
   .ov{position:fixed;inset:0;z-index:40;display:none}
   .ov.on{display:flex}
+  .lbbar{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;font-family:var(--mono);font-size:12px;color:var(--muted);gap:8px}
+  .lbbar button{background:#1b2529;border-radius:999px;padding:8px 13px;color:var(--text);flex-shrink:0}
   #lb{background:rgba(0,0,0,.97);flex-direction:column}
-  #lbScroll{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center}
+  #lbScroll{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;-webkit-overflow-scrolling:touch}
   #lbScroll img{max-width:100%;max-height:100%}
   #lbScroll.zoom{display:block}
   #lbScroll.zoom img{max-width:none;max-height:none;width:260%}
-  .lbbar{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
-  .lbbar button{background:#1b2529;border-radius:999px;padding:8px 13px;color:var(--text)}
-
+  #lbScroll.html{display:block;padding:12px}
+  .term{background:#07100b;border:1px solid #1d3a26;color:#bfe9c9;font-family:var(--mono);font-size:11.5px;line-height:1.65;padding:14px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
+  .term .h{color:#e3f7e8}
+  .term .sep{color:#2f6a40;overflow:hidden;white-space:nowrap}
+  .term .orange{color:var(--orange)}
+  .term .cur{animation:blink 1s steps(1) infinite}
+  .term table{border-collapse:collapse;width:100%;margin:8px 0;font-size:10.5px}
+  .term td,.term th{border:1px solid #2f6a40;padding:3px 4px;text-align:left;vertical-align:middle}
+  .term img{width:22px;height:28px;object-fit:cover;filter:grayscale(1) contrast(1.2);vertical-align:middle;margin-right:4px}
+  .term .enc{color:var(--orange)}
+  #cv{background:#000;flex-direction:column}
+  #cvBox{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  #cvBox img{width:100%;max-height:100%;object-fit:contain;filter:grayscale(.6) contrast(1.1)}
+  .hud{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none}
+  .hud .l{font-size:11px;left:10px;top:8px}
+  .hud .r{position:absolute;right:10px;top:8px;font-family:var(--mono);font-size:11px;color:var(--red)}
+  .hud .c{position:absolute;right:10px;bottom:8px;font-family:var(--mono);font-size:11px;color:#d6eee2}
   #kp{background:rgba(3,6,7,.97);flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));gap:12px}
   .kp-t{font-family:var(--mono);color:var(--amber);letter-spacing:2px;font-size:15px;text-align:center}
   .kp-s{font-family:var(--mono);color:var(--muted);font-size:11px;letter-spacing:1px}
-  .kp-d{font-family:var(--mono);font-size:34px;letter-spacing:10px;min-height:50px;color:var(--green);border-bottom:2px solid var(--line);min-width:220px;text-align:center}
+  .kp-d{font-family:var(--mono);font-size:30px;letter-spacing:8px;min-height:48px;color:var(--green);border-bottom:2px solid var(--line);min-width:230px;text-align:center}
   .kp-d.bad{color:var(--red);animation:shake .35s}
+  .kp-d.prio{font-size:13px;letter-spacing:1px;line-height:48px}
   @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
   .kp-g{display:grid;grid-template-columns:repeat(3,74px);gap:10px}
-  .kp-g button{height:62px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-size:24px;font-family:var(--mono)}
+  .kp-g button{height:58px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-size:24px;font-family:var(--mono)}
   .kp-g button.go{background:var(--green);color:#03120a;font-size:16px;font-weight:700}
   .kp-last{max-width:330px;background:var(--leo);border-radius:12px;padding:8px 11px;font-size:14px;min-height:20px}
   .kp-last:empty{display:none}
   .kp-x{color:var(--muted);font-family:var(--mono);font-size:12px;padding:8px}
-
   #call{background:radial-gradient(circle at top,#1b2a30,#020405);flex-direction:column;align-items:center;justify-content:space-between;padding:calc(80px + env(safe-area-inset-top)) 24px calc(60px + env(safe-area-inset-bottom));text-align:center}
   #call .ct{font-size:28px;font-weight:600}
   #call .cs{color:var(--muted);margin-top:6px}
   #call .ca{display:flex;gap:60px}
-  #call .ca button{width:74px;height:74px;border-radius:50%;font-size:28px;color:#fff}
-  .dec{background:#d62828}.acc{background:#1f9d55;animation:pc 1.2s infinite}
-  @keyframes pc{50%{transform:scale(1.08)}}
-
-  #cam0{background:#000;flex-direction:column}
-  #cam0 video,#cam0 img.fb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.5) brightness(.75);transform:scaleX(-1)}
-  #cam0 .hud{position:absolute;left:0;right:0;top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:space-between;padding:0 14px;font-family:var(--mono);font-size:13px;color:#e8f4f0;text-shadow:0 0 4px #000}
-  #cam0 .say{position:absolute;left:0;right:0;bottom:22%;text-align:center;font-family:var(--mono);font-size:26px;letter-spacing:3px;color:#ff3b3b;text-shadow:0 0 10px #000;font-weight:700;padding:0 16px}
-  #cam0 .noise{opacity:.28}
-
-  #sil{background:#000;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
-  #sil .big{font-family:var(--mono);font-size:30px;letter-spacing:8px;color:var(--red)}
-  #sil .meter{width:240px;height:10px;border-radius:5px;background:#1a1a1a;overflow:hidden}
-  #sil .meter i{display:block;height:100%;width:0;background:var(--green);transition:width .08s}
-  #sil .cd{font-family:var(--mono);font-size:44px;color:#ddd}
-  #sil p{color:var(--muted);max-width:300px}
-
-  #js{background:#000;align-items:center;justify-content:center}
-  #js img{width:100%;height:100%;object-fit:cover;transform:scale(1.35);filter:contrast(1.6) brightness(1.3)}
-
-  #end{background:radial-gradient(ellipse at top,#1a0808,#000 70%);flex-direction:column;justify-content:center;padding:calc(30px + env(safe-area-inset-top)) 26px calc(30px + env(safe-area-inset-bottom));gap:16px;text-align:center}
-  #end .n{font-family:var(--mono);color:var(--muted);letter-spacing:3px}
-  #end h1{font-family:var(--mono);letter-spacing:4px;color:var(--red);font-size:28px}
-  #end p{color:#cbd6da;line-height:1.55}
-  #end .stats{font-family:var(--mono);font-size:12px;color:var(--muted)}
-
-  body.glitch #app{animation:gl .12s infinite;filter:contrast(1.7) hue-rotate(80deg)}
-  @keyframes gl{0%{transform:translate(0)}25%{transform:translate(-5px,3px)}50%{transform:translate(5px,-2px)}75%{transform:translate(-2px,-4px)}}
-  .toast{position:fixed;left:50%;top:calc(56px + env(safe-area-inset-top));transform:translateX(-50%);background:#1b2529;border:1px solid var(--amber);color:var(--amber);padding:7px 13px;border-radius:999px;font-family:var(--mono);font-size:11.5px;z-index:35;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+  #call .ca button{width:74px;height:74px;border-radius:50%;font-size:26px;color:#fff}
+  .dec{background:#d62828}.acc{background:#1f9d55}
+  #callBar{position:fixed;left:8px;right:8px;top:calc(6px + env(safe-area-inset-top));z-index:41;background:#16302a;border-radius:16px;padding:9px 12px;display:none;align-items:center;gap:10px;box-shadow:0 8px 20px rgba(0,0,0,.6);font-size:13px}
+  #callBar.on{display:flex}
+  #callBar b{flex:1}
+  #callBar button{background:#d62828;color:#fff;border-radius:999px;padding:6px 12px;font-size:12px}
+  #camAct{background:#000;flex-direction:column}
+  #caBox{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  #caBox img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;filter:grayscale(.6) contrast(1.1)}
+  #caBox img.on{opacity:1}
+  #caBox img.adv{transition:transform 8s linear}
+  .ca-ctl{display:flex;flex-direction:column;gap:8px;padding:12px 14px calc(14px + env(safe-area-inset-bottom))}
+  .ca-ctl button{border:1px solid #3c5058;color:#cfdade;border-radius:10px;padding:13px;font-family:var(--mono);font-size:13px;letter-spacing:1px;background:#0c1418}
+  .ca-ctl button.alt{border-color:#38e08a;color:#38e08a}
+  .ca-ctl button.ko{border-color:var(--red);color:var(--red)}
+  .ca-msg{min-height:20px;font-size:13px;color:#cfdade;background:var(--leo);border-radius:10px;padding:7px 10px}
+  .ca-msg:empty{display:none}
+  .blk{background:#000;z-index:60}
+  #dark{transition:none}
+  #sil{flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px}
+  #sil .a{font-family:var(--mono);font-size:10.5px;color:#3a4a50;letter-spacing:2px}
+  #sil .b{font-family:var(--mono);font-size:15px;color:#7d9097}
+  #crash{background:#fff;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:30px;z-index:70;font-family:-apple-system,"Helvetica Neue",Arial,sans-serif}
+  #crash h3{font-size:21px;color:#2b2b2b;font-weight:600}
+  #crash p{font-size:15px;color:#7a7a7a;max-width:300px}
+  #load{background:#000;align-items:center;justify-content:center;z-index:70}
+  #load i{width:22px;height:22px;border:2px solid #333;border-top-color:#999;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #js{background:#000;align-items:center;justify-content:center;z-index:65}
+  #js img{width:100%;height:100%;object-fit:cover;transform:scale(1.3);filter:grayscale(1) contrast(1.5) brightness(1.2)}
+  #sober{background:#0b0d0e;align-items:center;justify-content:center;z-index:66;padding:30px;text-align:center}
+  #sober p{font-family:var(--mono);font-size:12.5px;color:#9aa9ae;letter-spacing:.5px}
+  #notif{background:#000;flex-direction:column;align-items:center;padding:calc(60px + env(safe-area-inset-top)) 16px;z-index:67;gap:24px}
+  #notif .ls{font-family:var(--mono);font-size:11px;color:#555}
+  #notif .card{width:100%;max-width:360px;background:rgba(60,60,64,.75);border-radius:16px;padding:12px 14px;color:#eee}
+  #notif .card .hd{display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:3px}
+  #notif .card b{font-size:14px}
+  #rel{background:#030604;flex-direction:column;z-index:80;padding:calc(18px + env(safe-area-inset-top)) 12px calc(18px + env(safe-area-inset-bottom));overflow-y:auto}
+  #rel .term{border:none;background:none;font-size:11.5px}
+  #rel .x{align-self:flex-end;font-family:var(--mono);font-size:11px;color:#3d5a45;padding:6px}
+  body.mg #app{transform:translate(2px,-1px)}
+  .toast{position:fixed;left:50%;top:calc(56px + env(safe-area-inset-top));transform:translateX(-50%);background:#11181b;border:1px solid #2c3c42;color:#9fb0b6;padding:7px 13px;border-radius:6px;font-family:var(--mono);font-size:11px;z-index:75;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
   .toast.on{opacity:1}
+  #hv{position:fixed;width:2px;height:2px;opacity:0;pointer-events:none;left:0;top:0}
 </style>
 </head>
 <body>
 
-<!-- ======================= INTRO 1 : avertissement ======================= -->
-<section class="screen" id="s-warn">
-  <div class="logo">LA RELÈVE<small>UNE NUIT AUX ARCHIVES NORD</small></div>
-  <div class="warn">
-    <b>Jeu d'horreur interactif · environ 45 min.</b>
-    <ul style="margin-top:8px">
-      <li>Joue <b>seul·e</b>, <b>la nuit</b>, lumière éteinte, avec des <b>écouteurs</b>.</li>
-      <li>Mode silencieux désactivé, volume à moitié, luminosité à fond.</li>
-      <li>Sursauts, sons forts et flashs lumineux. Déconseillé aux personnes cardiaques ou épileptiques.</li>
-      <li>Le jeu utilise la <b>caméra</b> et le <b>micro</b>. Rien n'est enregistré ni envoyé : tout reste sur ton téléphone.</li>
-    </ul>
-  </div>
-  <p style="font-size:13px">Sur iPhone : Partager › « Sur l'écran d'accueil » pour jouer en plein écran.</p>
-  <button class="btn" onclick="go('s-id')">J'ai compris</button>
+<!-- ======================= PORTAIL (Ch. 0) ======================= -->
+<section id="portal">
+  <div class="top" id="pTop"><b>ARCHIVES NORD · INTRANET SÉCURITÉ</b>Terminal <span id="pVeille">VEILLE</span> — Prise de poste télésurveillance (Site SS-B)</div>
+  <div class="wrap" id="pWrap"></div>
 </section>
-
-<!-- ======================= INTRO 2 : identité ======================= -->
-<section class="screen hide" id="s-id">
-  <div class="logo">VEILLE<small>TÉLÉSURVEILLANCE · ÉQUIPE DE NUIT</small></div>
-  <h2>Bienvenue dans l'équipe.</h2>
-  <p>Ce soir, tu surveilles à distance le site des <b>Archives Nord</b>. Un gardien est sur place. Toi, tu as les caméras, les journaux et les portes.</p>
-  <div class="field"><label>Prénom de l'opérateur</label><input id="iName" autocomplete="off" maxlength="20" placeholder="Ton prénom" /></div>
-  <div class="field"><label>Je suis</label>
-    <div class="seg" id="iAgree">
-      <button data-v="e">une opératrice</button><button data-v="">un opérateur</button><button data-v="·e">peu importe</button>
-    </div>
-  </div>
-  <button class="btn" onclick="toCalib()">Suivant</button>
-</section>
-
-<!-- ======================= INTRO 3 : calibration ======================= -->
-<section class="screen hide" id="s-cal">
-  <div class="logo">VEILLE<small>VÉRIFICATION DU POSTE</small></div>
-  <div class="calib"><video id="calVid" playsinline muted autoplay></video>
-    <div><div><b>Caméra opérateur</b></div><div class="st" id="calCam">en attente…</div></div></div>
-  <div class="calib"><div style="font-size:30px;width:64px;text-align:center">🎧</div>
-    <div><div><b>Son</b> — mets tes écouteurs</div><div class="st" id="calSnd">touche « Tester le son »</div></div></div>
-  <button class="btn ghost" onclick="testSound()">🔊 Tester le son</button>
-  <button class="btn" onclick="takePost()">Prendre mon poste</button>
-</section>
-
-<!-- ======================= REPRISE ======================= -->
-<section class="screen hide" id="s-resume">
-  <div class="logo">VEILLE<small>SESSION EN COURS</small></div>
-  <p>Ta garde n'est pas terminée.</p>
-  <button class="btn" onclick="resume()">Reprendre mon poste</button>
-  <button class="btn ghost" onclick="restart()">Recommencer depuis le début</button>
-</section>
+<div id="seg"><div class="n" id="segN"></div><div class="t" id="segT"></div><div class="lv"><i id="segL"></i></div><div class="e" id="segE"></div></div>
+<div id="photo"><video id="phV" playsinline muted autoplay></video><div>Visage dégagé, fond neutre.</div><div id="phS" style="font-family:var(--mono);font-size:11px;color:#888"></div></div>
 
 <!-- ======================= APPLI ======================= -->
 <div id="app" class="hide">
-  <div class="bar"><div class="t" id="logoTap"><b>VEILLE</b>ARCHIVES NORD · SS-B</div><span id="clk">--:--</span><span class="rec">● REC</span></div>
+  <div class="bar"><div class="t" id="logoTap"><b>VEILLE</b>ARCHIVES NORD · SS-B · #42</div><span id="clk">--:--</span><span class="rec">●</span></div>
   <div class="chrono" id="chrono"></div>
   <div class="views">
     <section class="view on" id="v-chat">
-      <div class="who"><div class="av" id="leoAv">L</div><div><div class="n">Léo · gardien</div><div class="s" id="leoSt">en ligne</div></div></div>
+      <div class="who"><div class="av" id="leoAv">L</div><div><div class="n">Léo · L-511</div><div class="s" id="leoSt">en ligne</div></div></div>
       <div class="chat" id="chat"></div>
-      <form class="input" id="form"><input id="msg" placeholder="Message à Léo" autocomplete="off" /><button>Envoyer</button></form>
-      <button class="kpbtn hide" id="kpBtn" onclick="openKp()">🔢 PAVÉ</button>
+      <button class="comfort hide" id="comfort">Couper le retour audio gardien (confort opérateur)</button>
+      <form class="input" id="form"><input id="msg" placeholder="Message à Léo" autocomplete="off" autocorrect="off" /><button id="send">Envoyer</button></form>
+      <button class="kpbtn hide" id="kpBtn">PAVÉ</button>
     </section>
     <section class="view" id="v-cams"><div class="cams" id="cams"></div></section>
     <section class="view" id="v-docs"><div class="docs" id="docs"></div></section>
   </div>
   <nav class="tabs">
-    <button class="on" data-v="chat"><i>📟</i>INTERPHONE<span class="badge hide" id="b-chat"></span></button>
-    <button data-v="cams"><i>📹</i>CAMÉRAS<span class="badge hide" id="b-cams"></span></button>
-    <button data-v="docs"><i>📁</i>DOSSIERS<span class="badge hide" id="b-docs"></span></button>
+    <button class="on" data-v="chat"><i>▣</i>INTERPHONE<span class="badge hide" id="b-chat"></span></button>
+    <button data-v="cams"><i>◉</i>CAMÉRAS<span class="badge hide" id="b-cams"></span></button>
+    <button data-v="docs"><i>▤</i>DOSSIERS<span class="badge hide" id="b-docs"></span></button>
   </nav>
 </div>
 
-<!-- overlays -->
-<div class="ov" id="lb"><div class="lbbar"><span id="lbT"></span><span><button onclick="zoom()">🔍</button> <button onclick="hideOv('lb')">✕</button></span></div><div id="lbScroll"><img id="lbImg" alt="" /></div></div>
+<!-- superpositions -->
+<div class="ov" id="lb"><div class="lbbar"><span id="lbT"></span><span><button id="lbZ">Zoom</button> <button id="lbX">✕</button></span></div><div id="lbScroll"></div></div>
+<div class="ov" id="cv"><div class="lbbar"><span id="cvT"></span><button id="cvX">✕</button></div><div id="cvBox"><img id="cvImg" alt="" /><canvas class="noise" id="cvN" width="120" height="90"></canvas><div class="hud"><span class="l" id="cvL"></span><span class="r rec">● REC</span><span class="c" id="cvC"></span></div></div></div>
 <div class="ov" id="kp">
   <div class="kp-t" id="kpT"></div><div class="kp-s" id="kpS"></div>
   <div class="kp-d" id="kpD"></div>
   <div class="kp-g" id="kpG"></div>
   <div class="kp-last" id="kpL"></div>
-  <button class="kp-x" onclick="hideOv('kp')">Fermer le pavé (consulter les dossiers)</button>
+  <button class="kp-x" id="kpX">Fermer le pavé (consulter les dossiers)</button>
 </div>
-<div class="ov" id="call"><div><div class="ct" id="callT"></div><div class="cs" id="callS">Appel entrant…</div></div><div class="ca" id="callA"><button class="dec" onclick="callEnd('declined')">✕</button><button class="acc" onclick="callAnswer()">📞</button></div></div>
-<div class="ov" id="cam0"><video id="c0v" playsinline muted autoplay></video><img class="fb hide" id="c0fb" src="medias/15_profil_noir.jpg" alt="" /><canvas class="noise" id="c0n" width="90" height="160"></canvas><div class="hud"><span>CAM 00 · POSTE OPÉRATEUR</span><span class="rec">● REC</span></div><div class="hud" style="top:auto;bottom:calc(12px + env(safe-area-inset-bottom))"><span id="c0t"></span><span>ADM-408</span></div><div class="say" id="c0s"></div></div>
-<div class="ov" id="sil"><div class="big">SILENCE</div><p id="silP"></p><button class="btn" id="silBtn">🎙️ Activer le micro de l'interphone</button><div class="cd" id="silCd"></div><div class="meter"><i id="silM"></i></div></div>
-<div class="ov" id="js"><img src="medias/15_profil_noir.jpg" alt="" /></div>
-<div class="ov" id="end"><div class="n" id="endN"></div><h1 id="endT"></h1><p id="endP"></p><div class="stats" id="endS"></div><button class="btn" onclick="restart()">Rejouer</button></div>
+<div class="ov" id="call"><div><div class="ct" id="callT"></div><div class="cs" id="callS">Appel entrant…</div></div><div class="ca"><button class="dec" id="callDec">✕</button><button class="acc" id="callAcc">✆</button></div></div>
+<div id="callBar"><b id="cbT"></b><span id="cbS" style="font-family:var(--mono);font-size:12px"></span><button id="cbX">Raccrocher</button></div>
+<div class="ov" id="camAct"><div id="caBox"><canvas class="noise" id="caN" width="120" height="90" style="opacity:.25"></canvas><div class="hud"><span class="l" id="caL"></span><span class="r rec">● REC</span><span class="c" id="caC"></span></div></div><div class="ca-ctl" id="caCtl"></div></div>
+<div class="ov blk" id="dark"></div>
+<div class="ov blk" id="sil"><div class="a" id="silA"></div><div class="b" id="silB"></div></div>
+<div class="ov blk" id="black"></div>
+<div class="ov" id="crash"><h3>Impossible d'ouvrir la page.</h3><p>La connexion réseau a été perdue.</p></div>
+<div class="ov" id="load"><i></i></div>
+<div class="ov" id="js"><img id="jsImg" alt="" /></div>
+<div class="ov" id="sober"><p id="soberP"></p></div>
+<div class="ov" id="notif"><div class="ls">Téléphone de service · L-511</div><div class="card"><div class="hd"><span>MESSAGES</span><span>06:04</span></div><b>Inès</b><div>t'es où ? jtai attendu</div></div></div>
+<div class="ov" id="rel"><button class="x" id="relX"></button><div id="relBody"></div></div>
+<video id="hv" playsinline muted autoplay></video>
 <div class="toast" id="toast"></div>
 
 <script src="histoire.js"></script>
 <script>
 /* =========================================================
-   MOTEUR
+   MOTEUR VEILLE v2.5
    ========================================================= */
 const $ = id => document.getElementById(id);
-const P = new URLSearchParams(location.search);
-const F = P.get('fast') === '1' ? 0.06 : 1;          // ?fast=1 pour tester
-const KEY = 'la_releve_veille_v1';
+const QS = new URLSearchParams(location.search);
+const FAST = QS.get('fast') === '1';
+const F = FAST ? 0.06 : 1;                         // ?fast=1 : tout va vite + créneau contourné
+const KEY = 'la_releve_veille_v25';
 
 let S = load();
-function blank(){ return { name:'', agree:'e', started:false, chapter:0, log:[], docs:[], cams:{}, flags:{}, chronoEnd:0, hints:0, t0:0, ended:null, leo:{avatar:'',status:'en ligne'}, cp:null }; }
+const MEM = { badge: null, segs: null, portrait: null, ambient: null, cam: null, v5: null };   // mémoire vive : jamais sauvegardée
+function blank(){ return { name:'', agree:'', local:'', porte:'', seul:null, started:false, chapter:0, log:[], docs:[], cams:{}, flags:{}, chronoEnd:0, t0:0, ended:null, endedAt:0, leo:{avatar:'',status:'en ligne'}, cp:null, r42:[], r42last:'', absN:0, obsN:0, wounds:0, seq:0 }; }
 function load(){ try { return Object.assign(blank(), JSON.parse(localStorage.getItem(KEY)) || {}); } catch(e){ return blank(); } }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
 
 const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/(\d)[\s.\-]+(?=\d)/g,'$1');
-function T(s){
-  const n = S.name.trim();
-  return (s||'').replace(/\{,P\}/g, n ? ', '+n : '').replace(/\{P\}/g, n || 'toi').replace(/\{e\}/g, S.agree);
-}
-const hhmm = (d=new Date()) => String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-const fmt = s => { s=Math.max(0,Math.ceil(s)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+function T(s){ const n = S.name.trim(); return (s||'').replace(/\{,P\}/g, n ? ', '+n : '').replace(/\{P\}/g, n || 'toi').replace(/\{e\}/g, S.agree); }
+const p2 = n => String(n).padStart(2,'0');
+const hhmm = (d=new Date()) => p2(d.getHours())+':'+p2(d.getMinutes());
+const hms = (d=new Date()) => { d = new Date(d); return p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds()); };
+const mmss = s => { s = Math.max(0, Math.round(s)); return p2(Math.floor(s/60))+':'+p2(s%60); };
+const ref = () => { const d = new Date(S.t0 || Date.now()); return `R9-${d.getFullYear()}-${p2(d.getMonth()+1)}`; };
+const chap = () => S.chapter + 1;                  // numéro de chapitre de l'histoire (1 à 13)
 
 /* ---------- annulation (fin de chrono) ---------- */
 class GameOver { constructor(id){ this.id = id; } }
 const pending = new Set();
-function cancellable(exec){
-  let rej; const p = new Promise((res, r) => { rej = r; exec(v => { pending.delete(rej); res(v); }); });
-  pending.add(rej); return p;
-}
+function cancellable(exec){ let rej; const p = new Promise((res, r) => { rej = r; exec(v => { pending.delete(rej); res(v); }); }); pending.add(rej); return p; }
 function abortAll(e){ pending.forEach(r => r(e)); pending.clear(); }
 function ending(id){ throw new GameOver(id); }
-
-/* ---------- temps ---------- */
 const sleep = ms => cancellable(done => setTimeout(done, ms * F));
+const rawSleep = ms => new Promise(r => setTimeout(r, ms));
+function waitFor(fn, ms){ return cancellable(done => { const t0 = Date.now(); const iv = setInterval(() => { if (fn()){ clearInterval(iv); done(true); } else if (Date.now() - t0 > ms * F){ clearInterval(iv); done(false); } }, 250); }); }
 
-/* ---------- sons (Web Audio) ---------- */
-let AC = null, master = null;
+/* ---------- images avec repli (fichier final, puis provisoire) ---------- */
+function cands(key){ if (!key) return []; if (key.startsWith('mem:')) return [MEM[key.slice(4)]].filter(Boolean); return MEDIA[key] || [key]; }
+function setImg(img, key){
+  const c = cands(key); let i = 0;
+  img.onerror = () => { i++; if (i < c.length) img.src = c[i]; else img.onerror = null; };
+  if (c.length) img.src = c[0]; else img.removeAttribute('src');
+}
+function imgEl(key){ const i = new Image(); i.alt = ''; setImg(i, key); return i; }
+
+/* =========================================================
+   SON (Web Audio) : limiteur général à −6 dBFS environ
+   ========================================================= */
+let AC = null, master = null, voiceBus = null;
 function audioInit(){
   try {
-    if (!AC){ AC = new (window.AudioContext||window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .9; master.connect(AC.destination); }
+    if (!AC){
+      AC = new (window.AudioContext||window.webkitAudioContext)();
+      const lim = AC.createDynamicsCompressor();
+      lim.threshold.value = -7; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.002; lim.release.value = 0.12;
+      master = AC.createGain(); master.connect(lim); lim.connect(AC.destination);
+      voiceBus = AC.createGain(); voiceBus.connect(master);
+    }
     if (AC.state === 'suspended') AC.resume();
   } catch(e){}
 }
-document.addEventListener('pointerdown', audioInit, { passive:true });
-function tone(f, d, v=.2, type='sine', at=0){
+document.addEventListener('pointerdown', audioInit, { passive:true, capture:true });
+const BUF = {};
+function decode(ab){ return new Promise((res, rej) => { try { const p = AC.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); } catch(e){ rej(e); } }); }
+function loadBuf(key){
+  if (!AC) audioInit();
+  if (key === 'mem:v5') return Promise.resolve(MEM.v5);
+  if (!BUF[key]) BUF[key] = (async () => {
+    for (const u of (MEDIA[key] || [])){
+      try { const r = await fetch(u); if (!r.ok) continue; const b = await decode(await r.arrayBuffer()); if (b) { b._file = u; return b; } } catch(e){}
+    }
+    return null;
+  })();
+  return BUF[key];
+}
+function playBuf(buf, { pan = 0, gain = 1, bus = null, offset = 0 } = {}){
+  if (!AC || !buf) return { stop(){}, ended: Promise.resolve(), dur: 0 };
+  const s = AC.createBufferSource(); s.buffer = buf;
+  const g = AC.createGain(); g.gain.value = gain;
+  let node = s;
+  if (pan && AC.createStereoPanner){ const p = AC.createStereoPanner(); p.pan.value = pan; s.connect(p); node = p; }
+  node.connect(g); g.connect(bus || master);
+  const ended = new Promise(r => { s.onended = r; });
+  s.start(0, offset);
+  return { src: s, stop(){ try { s.stop(); } catch(e){} }, ended, dur: buf.duration, t0: AC.currentTime };
+}
+async function play(key, opts = {}){
+  const b = await loadBuf(key); if (!b) return;
+  const h = playBuf(b, opts); playing.add(h); h.ended.then(() => playing.delete(h));
+  await Promise.race([h.ended, rawSleep(b.duration * 1000 * Math.max(F, .15) + 50)]);
+}
+const playing = new Set();
+function stopAll(){ playing.forEach(h => h.stop()); playing.clear(); }
+function tone(f, d, v=.15, type='sine', at=0){
   if (!AC) return; const t = AC.currentTime + at;
   const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f;
   g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t+.01); g.gain.exponentialRampToValueAtTime(.0001, t+d);
   o.connect(g); g.connect(master); o.start(t); o.stop(t+d+.05);
 }
-function noise(d, v=.3, lp=8000, at=0){
-  if (!AC) return; const n = Math.floor(AC.sampleRate*d), b = AC.createBuffer(1, n, AC.sampleRate), x = b.getChannelData(0);
-  for (let i=0;i<n;i++) x[i] = (Math.random()*2-1) * Math.pow(1 - i/n, 2);
-  const s = AC.createBufferSource(); s.buffer = b; const f = AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value = lp;
-  const g = AC.createGain(); g.gain.value = v; s.connect(f); f.connect(g); g.connect(master); s.start(AC.currentTime + at);
-}
 const sfx = {
-  pop(){ tone(880,.08,.08); tone(1320,.1,.06,'sine',.07); },
-  sys(){ tone(440,.06,.04,'square'); },
-  glitch(){ noise(.35,.25,3000); tone(90,.3,.25,'sawtooth'); },
-  bang(){ tone(52,.9,.9,'sine'); noise(.6,.9,2500); tone(311,1.2,.12,'triangle'); tone(797,.9,.08,'triangle'); noise(.4,.4,900,.12); },
-  ring(){ [0,.25,.5,.75].forEach((a,i)=>tone(i%2?660:880,.2,.18,'sine',a)); },
-  test(){ tone(523,.15,.15); tone(659,.15,.15,'sine',.18); tone(784,.25,.15,'sine',.36); },
+  pop(){ tone(880,.06,.035); tone(1320,.08,.025,'sine',.05); },
+  log(){ tone(520,.04,.012,'square'); },
+  key(){ tone(1200,.03,.03,'square'); },
+  ok(){ tone(988,.1,.08); tone(1318,.16,.08,'sine',.1); },
+  ko(){ tone(180,.3,.15,'square'); },
+  ring(){ [0,.25,.5,.75].forEach((a,i)=>tone(i%2?660:880,.18,.1,'sine',a)); },
+  test(){ tone(523,.15,.1); tone(659,.15,.1,'sine',.18); tone(784,.25,.1,'sine',.36); },
 };
-let media1 = null;   // élément audio « débloqué » pour iOS
-function unlockMedia(){ try { media1 = new Audio(); media1.src = 'medias/fin_survie.mp3'; media1.volume = 0; media1.play().then(()=>{ media1.pause(); media1.volume = 1; }).catch(()=>{}); } catch(e){} }
 
-/* ---------- écran allumé ---------- */
-let wake = null;
-async function keepAwake(){ try { if ('wakeLock' in navigator && !wake){ wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release',()=>wake=null); } } catch(e){} }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.started) keepAwake(); });
+/* ---------- nappe d'ambiance (boucle sans couture) ---------- */
+function synthNappe(){
+  const sr = AC.sampleRate, n = sr * 20, b = AC.createBuffer(2, n, sr);
+  for (let c = 0; c < 2; c++){
+    const x = b.getChannelData(c); let lp = 0, lp2 = 0;
+    for (let i = 0; i < n; i++){
+      const t = i / sr; lp += 0.02 * ((Math.random()*2-1) - lp); lp2 += 0.2 * (lp - lp2);
+      x[i] = lp2 * 0.35 + 0.0045*Math.sin(2*Math.PI*50*t) + 0.003*Math.sin(2*Math.PI*100*t+c) + 0.0016*Math.sin(2*Math.PI*150*t) + (Math.random() < 0.0004 ? (Math.random()-.5)*0.01 : 0);
+    }
+  }
+  return b;
+}
+const nappe = {
+  g: null, src: null, starting: false,
+  async start(){
+    audioInit(); if (!AC || this.src || this.starting) return; this.starting = true;
+    this.g = AC.createGain(); this.g.gain.value = 1; this.g.connect(master);
+    let b = await loadBuf('nappe'), file = !!b;
+    if (!b) b = synthNappe();
+    const s = AC.createBufferSource(); s.buffer = b; s.loop = true;
+    if (file && b.duration > 1){ s.loopStart = 0.06; s.loopEnd = b.duration - 0.06; }
+    s.connect(this.g); s.start(0, file ? 0.06 : 0); this.src = s; this.starting = false;
+    if (S.flags.nappeCut) this.g.gain.value = 0;
+  },
+  cut(){ S.flags.nappeCut = 1; if (this.g && AC){ const t = AC.currentTime; this.g.gain.cancelScheduledValues(t); this.g.gain.setValueAtTime(0, t); } },
+  back(){ S.flags.nappeCut = 0; if (this.g && AC){ const t = AC.currentTime; this.g.gain.cancelScheduledValues(t); this.g.gain.setValueAtTime(this.g.gain.value, t); this.g.gain.linearRampToValueAtTime(1, t + 5); } },
+  stop(){ this.cut(); if (this.src){ try { this.src.stop(); } catch(e){} this.src = null; } },
+};
 
-/* ---------- bruit vidéo ---------- */
-function noiseLoop(cv){
-  const c = cv.getContext('2d'), w = cv.width, h = cv.height, img = c.createImageData(w, h);
-  setInterval(() => { for (let i=0;i<img.data.length;i+=4){ const v = Math.random()*255; img.data[i]=img.data[i+1]=img.data[i+2]=v; img.data[i+3]=255; } c.putImageData(img,0,0); }, 90);
+/* ---------- chaîne « interphone » (même recette que le kit) ---------- */
+function impulse(ctx, sec = 0.4){
+  const n = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(1, n, ctx.sampleRate), x = b.getChannelData(0);
+  for (let i = 0; i < n; i++) x[i] = (Math.random()*2-1) * Math.pow(1 - i/n, 3);
+  return b;
+}
+function interphone(ctx, input, out, { muffle = 0, wet = 0.12, dur = 10 } = {}){
+  const mk = (type, f) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = 0.707; return b; };
+  const chain = [mk('highpass',300), mk('highpass',300), mk('lowpass',3200), mk('lowpass',3200)];
+  if (muffle) chain.push(mk('lowpass', muffle));
+  const comp = ctx.createDynamicsCompressor(); comp.ratio.value = 4; comp.threshold.value = -18; comp.attack.value = 0.01; comp.release.value = 0.2; comp.knee.value = 6;
+  let n = input; chain.forEach(c => { n.connect(c); n = c; }); n.connect(comp);
+  const dry = ctx.createGain(); dry.gain.value = 1; comp.connect(dry); dry.connect(out);
+  const cv = ctx.createConvolver(); cv.buffer = impulse(ctx); const wg = ctx.createGain(); wg.gain.value = wet; comp.connect(cv); cv.connect(wg); wg.connect(out);
+  const hum = ctx.createOscillator(); hum.frequency.value = 50; const hg = ctx.createGain(); hg.gain.value = 0.0178; hum.connect(hg); hg.connect(out);
+  hum.start(); hum.stop(ctx.currentTime + dur);
+}
+
+/* ---------- micro : capture en mémoire vive ---------- */
+async function micOpen(){ return navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false } }); }
+function recorder(stream){
+  audioInit();
+  const src = AC.createMediaStreamSource(stream), an = AC.createAnalyser(); an.fftSize = 1024;
+  const pr = AC.createScriptProcessor(4096, 1, 1), z = AC.createGain(); z.gain.value = 0;
+  let chunks = [], rec = false;
+  pr.onaudioprocess = e => { if (rec) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+  src.connect(an); src.connect(pr); pr.connect(z); z.connect(AC.destination);
+  const a = new Float32Array(an.fftSize);
+  return {
+    start(){ chunks = []; rec = true; },
+    stop(){ rec = false; const n = chunks.reduce((s,c)=>s+c.length,0), out = new Float32Array(n); let o = 0; chunks.forEach(c => { out.set(c,o); o += c.length; }); return out; },
+    rms(){ an.getFloatTimeDomainData(a); let r = 0; for (const x of a) r += x*x; return Math.sqrt(r/a.length); },
+    close(){ try { src.disconnect(); pr.disconnect(); } catch(e){} stream.getTracks().forEach(t => t.stop()); },
+  };
+}
+function voiced(x, sr){  // renvoie [début, fin] (échantillons) de la parole
+  const w = Math.floor(sr * 0.02), r = [];
+  for (let i = 0; i + w <= x.length; i += w){ let s = 0; for (let j = i; j < i + w; j++) s += x[j]*x[j]; r.push(Math.sqrt(s/w)); }
+  const mx = Math.max(0, ...r), th = Math.max(0.008, mx * 0.15);
+  let a = r.findIndex(v => v > th), b = r.length - 1 - [...r].reverse().findIndex(v => v > th);
+  if (a < 0 || mx < 0.01) return null;
+  return { a: a*w, b: (b+1)*w, frames: r, th, w };
 }
 
 /* =========================================================
-   INTRO
+   PORTAIL (Ch. 0)
    ========================================================= */
-function go(id){ document.querySelectorAll('.screen').forEach(s => s.classList.add('hide')); $(id).classList.remove('hide'); }
-document.querySelectorAll('#iAgree button').forEach(b => b.onclick = () => { document.querySelectorAll('#iAgree button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.agree = b.dataset.v; });
-document.querySelector('#iAgree button').classList.add('on');
-
-let camStream = null;
-async function getCam(){
-  if (camStream) return camStream;
-  try { camStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ideal:720} }, audio:false }); } catch(e){ camStream = null; }
-  return camStream;
+const nuit = () => { const h = new Date().getHours(); return h >= 22 || h < 4; };
+function portal(){
+  $('portal').classList.remove('hide'); $('app').classList.add('hide');
+  const W = $('pWrap'); W.innerHTML = '';
+  if (S.ended){
+    W.innerHTML = `<div class="msg" id="pStat"></div><button class="act" id="pRel">Consulter le relevé #42</button><div class="foot">Système VEILLE · Archives Nord · Tout abandon de poste supérieur à 5 secondes est journalisé.</div>`;
+    $('pStat').textContent = PORTAIL.statut[S.ended]();
+    $('pRel').onclick = () => showRel(false);
+    return;
+  }
+  if (S.started){
+    W.innerHTML = `<div class="msg">Session opérateur #42 interrompue · ${ref()}<br><br>Reprise au début de la séquence en cours. Le chronomètre de garde n'est pas suspendu.</div><button class="go" id="pRes">REPRENDRE MON POSTE</button><div class="foot">Système VEILLE · Archives Nord · Tout abandon de poste supérieur à 5 secondes est journalisé.</div>`;
+    $('pRes').onclick = resume;
+    return;
+  }
+  if (!nuit() && !FAST){ W.innerHTML = `<div class="msg"></div>`; W.firstChild.textContent = PORTAIL.horsCreneau; return; }
+  W.innerHTML = `
+  <div class="aff">Affectation : <b>Opérateur #42</b> · Relève du poste #41 (clôture anormale à 23:58 — rupture liaison)</div>
+  <fieldset><legend>1. Identification du poste</legend>
+    <div class="row"><span>Prénom</span><input type="text" id="fName" maxlength="20" autocomplete="off" /></div>
+    <div class="row"><span>Intitulé</span><div class="opts" data-f="agree"><button data-v="e">Opératrice</button><button data-v="">Opérateur</button></div></div>
+  </fieldset>
+  <fieldset><legend>2. Déclaration de conformité — Travailleur Isolé de Nuit (PTI-N)</legend>
+    <div class="row"><span>Local d'exercice actuel</span><div class="opts" data-f="local"><button data-v="Chambre">Chambre</button><button data-v="Salon">Salon</button><button data-v="Bureau">Bureau</button></div></div>
+    <div class="row"><span>Accès au local</span><div class="opts" data-f="porte"><button data-v="fermée">Porte fermée</button><button data-v="ouverte">Porte ouverte</button></div></div>
+    <div class="row"><span>Situation pendant la garde (procédure d'évacuation des opérateurs en poste à domicile)</span><div class="opts" data-f="seul"><button data-v="1">Seul·e au domicile</button><button data-v="0">Autre(s) personne(s) présente(s)</button></div></div>
+  </fieldset>
+  <fieldset><legend>3. Photo d'identification opérateur</legend>
+    <div class="q">« Visage dégagé, fond neutre. L'écran s'éclaire pendant la prise de vue. Image traitée localement, non transmise. »</div>
+    <button class="act" id="pPh">Prendre la photo</button><div class="st" id="pPhS"></div><img class="badgeph hide" id="pPhI" alt="" />
+  </fieldset>
+  <fieldset><legend>4. Engagements obligatoires avant ouverture de session</legend>
+    <label class="ck"><input type="checkbox" class="eng" /> <span><b>Confidentialité audio :</b> Je certifie être seul·e dans le local, lumière réduite, et porter un dispositif d'écoute individuel (écouteurs).</span></label>
+    <label class="ck"><input type="checkbox" class="eng" /> <span><b>Contrôle de présence (CAM 00 / Interphone) :</b> J'autorise l'activation ponctuelle de la caméra frontale et du micro de mon terminal. (Traitement strictement local sur l'appareil — aucune image ni piste audio n'est transmise ou conservée hors session.)</span></label>
+    <label class="ck"><input type="checkbox" class="eng" /> <span><b>Aptitude et décharge (18+) :</b> Je certifie être majeur·e, ne présenter aucun antécédent cardiaque ou épileptique, et accepte les conditions d'exposition sonore et visuelle liées à la surveillance du Sous-Sol B. Archives Nord décline toute responsabilité en cas d'incident psychologique durant la garde.</span></label>
+    <label class="ck"><input type="checkbox" class="eng" /> <span><b>Clause 7.3 — Journalisation :</b> Toute absence du poste, saisie ou interruption de supervision est horodatée et versée au journal de session de l'opérateur. Un résumé de garde est conservé sur l'appareil jusqu'à réinitialisation.</span></label>
+    <button class="act" id="pSnd" style="margin-top:4px">Tester le dispositif d'écoute</button><div class="st" id="pSndS"></div>
+  </fieldset>
+  <fieldset><legend>5. Clause 7.4 — Vérification vocale de l'engagement</legend>
+    <div class="q">« Lisez à voix haute chaque segment lorsqu'il s'affiche. L'enregistrement est traité localement et détruit en fin de session. »</div>
+    <button class="act" id="pVo">Commencer la vérification vocale</button><div class="st" id="pVoS"></div>
+  </fieldset>
+  <button class="go" id="pGo">PRENDRE MON POSTE</button>
+  <div class="err" id="pErr"></div>
+  <div class="val" id="pVal"></div>
+  <div class="foot">Système VEILLE · Archives Nord · Tout abandon de poste supérieur à 5 secondes est journalisé.</div>`;
+  const F0 = { agree: null, local: null, porte: null, seul: null };
+  W.querySelectorAll('.opts').forEach(o => o.querySelectorAll('button').forEach(b => b.onclick = () => {
+    o.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); F0[o.dataset.f] = b.dataset.v;
+  }));
+  let phDone = false, voDone = false;
+  $('pSnd').onclick = () => { audioInit(); sfx.test(); $('pSndS').textContent = '3 tonalités émises · vérifier les deux écouteurs'; };
+  $('pPh').onclick = async () => { audioInit(); await takeBadge(); phDone = true; };
+  $('pVo').onclick = async () => {
+    audioInit();
+    const n = $('fName').value.trim(); if (!n){ $('pErr').textContent = 'Prénom requis avant la vérification vocale.'; $('fName').focus(); return; }
+    if (F0.agree === null){ $('pErr').textContent = 'Intitulé requis avant la vérification vocale.'; return; }
+    $('pErr').textContent = '';
+    await voiceCheck(n, F0.agree); voDone = true;
+  };
+  $('pGo').onclick = async () => {
+    audioInit();
+    const n = $('fName').value.trim();
+    const miss = !n ? 'Prénom' : F0.agree === null ? 'Intitulé' : !F0.local ? "Local d'exercice" : !F0.porte ? 'Accès au local' : F0.seul === null ? 'Situation pendant la garde'
+      : [...W.querySelectorAll('.eng')].some(c => !c.checked) ? 'Engagements obligatoires' : !phDone ? "Photo d'identification" : !voDone ? 'Vérification vocale' : '';
+    if (miss){ $('pErr').textContent = 'Champ requis : ' + miss + '.'; return; }
+    $('pErr').textContent = ''; $('pGo').disabled = true;
+    S = blank();
+    S.name = n.charAt(0).toUpperCase() + n.slice(1); S.agree = F0.agree; S.local = F0.local; S.porte = F0.porte; S.seul = F0.seul === '1';
+    S.started = true; S.t0 = Date.now();
+    r42('Connexion validée. Clauses PTI-N signées.');
+    if (MEM.segs && MEM.segs.some(Boolean)) r42('Empreinte vocale opérateur enregistrée.');
+    save();
+    $('pVal').textContent = `Dossier opérateur #42 créé · ${hms()} · Réf. dossier : ${ref()}`;
+    unlockMedia(); keepAwake();
+    await rawSleep(2600);
+    openApp(); run();
+  };
 }
-async function toCalib(){
-  const n = $('iName').value.trim();
-  if (!n){ $('iName').focus(); return; }
-  S.name = n.charAt(0).toUpperCase() + n.slice(1); save();
-  go('s-cal'); audioInit();
-  const st = await getCam();
-  if (st){ $('calVid').srcObject = st; $('calCam').innerHTML = '<span class="ok">● connectée</span>'; }
-  else $('calCam').innerHTML = '<span class="ko">● refusée (jeu sans caméra)</span>';
+async function takeBadge(){
+  const ov = $('photo'); ov.classList.add('on'); $('phS').textContent = 'initialisation…';
+  let st = null;
+  try { st = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ ideal: 720 } }, audio:false }); } catch(e){}
+  if (st){
+    const v = $('phV'); v.srcObject = st; try { await v.play(); } catch(e){}
+    $('phS').textContent = 'prise de vue…'; await rawSleep(2200);
+    const c = document.createElement('canvas'); c.width = 360; c.height = 480;
+    const vw = v.videoWidth || 360, vh = v.videoHeight || 480, s = Math.max(360/vw, 480/vh);
+    const g = c.getContext('2d'); g.translate(360,0); g.scale(-1,1); g.drawImage(v, (360-vw*s)/2, (480-vh*s)/2, vw*s, vh*s);
+    MEM.badge = c.toDataURL('image/jpeg', .85);
+    st.getTracks().forEach(t => t.stop()); v.srcObject = null;
+    $('pPhI').src = MEM.badge; $('pPhI').classList.remove('hide');
+    $('pPhS').textContent = 'Photo enregistrée · traitement local'; $('pPhS').className = 'st ok';
+  } else { $('pPhS').textContent = 'Caméra indisponible · photo non enregistrée'; }
+  ov.classList.remove('on');
 }
-function testSound(){ audioInit(); sfx.test(); $('calSnd').innerHTML = '<span class="ok">● tu as entendu 3 notes ?</span>'; }
-function takePost(){
-  audioInit(); unlockMedia(); keepAwake();
-  if (camStream) camStream.getTracks().forEach(t => t.enabled = true);
-  S.started = true; S.t0 = Date.now(); S.chapter = 0; S.log = []; S.docs = []; S.cams = {}; S.flags = {}; save();
-  openApp(); run();
+async function voiceCheck(name, agree){
+  const segs = [`Je soussigné${agree}, ${name},`, `${agree ? 'opératrice' : 'opérateur'} numéro quarante-deux,`, "m'engage à ne jamais", 'ouvrir les accès', 'sans autorisation de la Direction.'];
+  let stream = null; try { stream = await micOpen(); } catch(e){}
+  if (!stream){ $('pVoS').textContent = 'Micro indisponible · vérification non enregistrée'; return; }
+  const rec = recorder(stream), ov = $('seg'); ov.classList.add('on'); MEM.segs = [];
+  let retry = false;
+  for (let i = 0; i < segs.length; i++){
+    $('segN').textContent = `SEGMENT ${i+1} / 5`; $('segT').textContent = segs[i]; $('segE').textContent = '';
+    await rawSleep(700);
+    rec.start(); let peak = 0; const t0 = Date.now();
+    while (Date.now() - t0 < 3000){ const r = rec.rms(); peak = Math.max(peak, r); $('segL').style.width = Math.min(100, r * 900) + '%'; await rawSleep(80); }
+    const x = rec.stop(); $('segL').style.width = '0';
+    if (peak < 0.02 && !retry){ retry = true; $('segE').textContent = 'Segment non reconnu · veuillez répéter'; await rawSleep(1400); i--; continue; }
+    MEM.segs[i] = voiced(x, AC.sampleRate) ? x : null;
+  }
+  rec.close(); ov.classList.remove('on');                       // micro refermé
+  $('pVoS').textContent = 'Vérification vocale enregistrée · traitement local'; $('pVoS').className = 'st ok';
 }
-async function resume(){
-  audioInit(); unlockMedia(); keepAwake(); await getCam();
-  if (S.cp){ S.log = S.log.slice(0, S.cp.logLen); S.docs = S.cp.docs.slice(); S.cams = Object.assign({}, S.cp.cams); S.flags = Object.assign({}, S.cp.flags); S.leo = Object.assign({}, S.cp.leo); }
-  save(); openApp(); run();
-}
-function restart(){ try { localStorage.removeItem(KEY); } catch(e){} location.href = location.pathname; }
 
 /* =========================================================
    APPLI : rendu
    ========================================================= */
+let media1 = null;
+function unlockMedia(){ try { media1 = new Audio(); media1.src = 'data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA'; media1.play().catch(()=>{}); } catch(e){} }
+let wake = null;
+async function keepAwake(){ try { if ('wakeLock' in navigator && !wake){ wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release',()=>wake=null); } } catch(e){} }
+function noiseLoop(cv){
+  const c = cv.getContext('2d'), w = cv.width, h = cv.height, img = c.createImageData(w, h);
+  const iv = setInterval(() => { if (!cv.isConnected){ clearInterval(iv); return; } if (document.hidden) return; for (let i=0;i<img.data.length;i+=4){ const v = Math.random()*255; img.data[i]=img.data[i+1]=img.data[i+2]=v; img.data[i+3]=255; } c.putImageData(img,0,0); }, 110);
+}
+let clockIv = null, frozen = false;
 function openApp(){
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hide'));
-  $('app').classList.remove('hide');
+  $('portal').classList.add('hide'); $('app').classList.remove('hide');
   renderCams(); renderDocs(); setLeo(S.leo, true);
   $('chat').innerHTML = ''; S.log.forEach(m => $('chat').appendChild(build(m)));
   scrollChat(true);
-  setInterval(tickClock, 500); tickClock();
+  if (!clockIv){ clockIv = setInterval(tick, 500); }
+  tick();
+  Object.keys(MEDIA).filter(k => k !== 'nappe').forEach(k => { if (/^(a\d|ch|fin|a3|a4|a5)/.test(k)) loadBuf(k); });
 }
 let view = 'chat';
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showView(b.dataset.v));
 function showView(v){
-  view = v;
+  const prev = view; view = v;
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-'+v));
   badge(v, 0); if (v === 'chat') scrollChat(true);
+  if (prev === 'cams' && v !== 'cams' && S.flags.periphShown && !S.flags.periphDone){ S.flags.periphDone = 1; save(); renderCams(); }
+  if (v === 'cams'){
+    if (S.flags.periph && !S.flags.periphDone && !S.flags.periphShown){ S.flags.periphShown = 1; save(); }
+    renderCams();
+  }
 }
 const badges = { chat:0, cams:0, docs:0 };
 function badge(v, n){ badges[v] = n === 0 ? 0 : badges[v] + n; const b = $('b-'+v); b.textContent = badges[v]; b.classList.toggle('hide', !badges[v]); }
-function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(()=>e.classList.remove('on'), 2600); }
-function scrollChat(force){ const c = $('chat'); if (force || c.scrollHeight - c.scrollTop - c.clientHeight < 200) requestAnimationFrame(()=> c.scrollTop = c.scrollHeight); }
+function toast(t, ms = 2800){ const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(()=>e.classList.remove('on'), ms); }
+function scrollChat(force){ const c = $('chat'); if (force || c.scrollHeight - c.scrollTop - c.clientHeight < 220) requestAnimationFrame(()=> c.scrollTop = c.scrollHeight); }
 
+/* ---------- messages ---------- */
 function build(m){
-  const d = document.createElement('div');
-  d.className = 'm ' + m.who + (m.deleted ? ' deleted' : '');
-  if (m.who === 'intrus'){ const t = document.createElement('span'); t.className='tag'; t.textContent='▲ LIAISON INCONNUE'; d.appendChild(t); }
-  if (m.deleted){ d.appendChild(document.createTextNode('🚫 Ce message a été supprimé')); }
-  else {
-    if (m.img){ const i = new Image(); i.src = m.img; i.onclick = () => openLb(m.img, 'Photo de Léo'); d.appendChild(i); }
-    if (m.audio){ const a = document.createElement('audio'); a.controls = true; a.preload = 'metadata'; a.src = m.audio; d.appendChild(a); }
-    if (m.video){ const v = document.createElement('video'); v.controls = true; v.playsInline = true; v.preload = 'metadata'; v.src = m.video + '#t=0.1'; d.appendChild(v); }
+  const wrap = document.createDocumentFragment();
+  const d = document.createElement('div'); d.className = 'm ' + m.who + (m.deleted ? ' deleted' : ''); d.id = 'm' + m.id;
+  if (m.deleted){ d.textContent = 'Ce message a été supprimé'; }
+  else if (m.who === 'archive'){
+    if (MEM.portrait){ const i = new Image(); i.src = MEM.portrait; d.appendChild(i); }
+    else { const p = document.createElement('div'); p.className = 'ph'; d.appendChild(p); }
+    const s = document.createElement('div'); s.textContent = m.text; d.appendChild(s);
+  } else {
+    if (m.who === 'direct' && m.tag){ const t = document.createElement('span'); t.className = 'tag'; t.textContent = m.tag; d.appendChild(t); }
+    if (m.img){
+      const key = (m.pair && S.flags['seen_' + m.id]) ? m.pair : m.img;
+      const i = imgEl(key);
+      i.onclick = () => openPhoto(m);
+      d.appendChild(i);
+    }
+    if (m.audio) d.appendChild(voiceUI(m));
     if (m.text){ const s = document.createElement('span'); s.textContent = m.text; d.appendChild(s); }
-    if (m.doc){ d.className = 'doc-chip'; d.textContent = '📁 Nouveau dossier : ' + DOCS[m.doc].title; d.onclick = () => openDoc(m.doc); }
   }
-  if (m.who === 'leo' || m.who === 'player'){ const t = document.createElement('span'); t.className = 'tm'; t.textContent = m.t || ''; d.appendChild(t); }
-  return d;
+  if (['leo','faux','player'].includes(m.who) && !m.deleted){ const t = document.createElement('span'); t.className = 'tm'; t.textContent = m.t || ''; d.appendChild(t); }
+  wrap.appendChild(d);
+  if (m.who === 'player'){ const r = document.createElement('div'); r.className = 'rd'; r.id = 'r' + m.id; r.textContent = m.rt ? 'Vu ' + m.rt : 'Envoyé'; wrap.appendChild(r); }
+  return wrap;
 }
+function rerender(m){ const old = $('m' + m.id); if (!old) return; const f = build(m); const nd = f.firstChild; old.replaceWith(nd); }
 function push(m){
-  m.t = hhmm(); S.log.push(m); save();
+  m.id = ++S.seq; m.t = m.t || hhmm(); S.log.push(m); save();
   $('chat').appendChild(build(m)); scrollChat(m.who === 'player');
-  if (m.who !== 'player'){ if (m.who === 'sys') sfx.sys(); else sfx.pop(); if (view !== 'chat') badge('chat', 1); }
-  if (document.hidden && m.who !== 'player') document.title = '(!) VEILLE';
+  if (m.who !== 'player'){ if (m.who === 'log') sfx.log(); else sfx.pop(); if (view !== 'chat') badge('chat', 1); }
+  if (document.hidden && m.who !== 'player') document.title = '(1) VEILLE';
+  return m;
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) document.title = 'VEILLE · Télésurveillance'; });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) document.title = 'VEILLE · Archives Nord'; });
 
-/* ---------- Léo ---------- */
-function setLeo(o, silent){
+/* accusés de lecture */
+let RM = 'auto';
+function readMode(m){ RM = m; }
+function markRead(){
+  const t = hhmm(); let ch = false;
+  S.log.forEach(m => { if (m.who === 'player' && !m.rt){ m.rt = t; ch = true; const r = $('r' + m.id); if (r) r.textContent = 'Vu ' + t; } });
+  if (ch) save();
+}
+
+/* Léo */
+function setLeo(o){
   Object.assign(S.leo, o); save();
-  const av = $('leoAv');
-  if (S.leo.avatar === null){ av.style.backgroundImage = ''; av.textContent = ''; av.style.background = '#111'; }
-  else if (S.leo.avatar){ av.style.background = ''; av.style.backgroundImage = `url(${S.leo.avatar})`; av.textContent = ''; }
+  const av = $('leoAv'); av.style.visibility = '';
+  if (S.leo.avatar === 'none'){ av.style.visibility = 'hidden'; }
+  else if (S.leo.avatar === null){ av.style.backgroundImage = ''; av.textContent = ''; av.style.background = '#000'; }
   else { av.style.background = ''; av.style.backgroundImage = ''; av.textContent = 'L'; }
   const st = $('leoSt'); st.textContent = S.leo.status; st.className = 's';
 }
 function typing(label){ const st = $('leoSt'); if (label){ st.textContent = label; st.className = 's typing'; } else { st.textContent = S.leo.status; st.className = 's'; } }
 
-/* =========================================================
-   API DE L'HISTOIRE
-   ========================================================= */
-async function leo(text, o={}){
-  text = T(text);
-  if (!o.fast){
-    typing(o.typingLabel || 'écrit…');
-    const d = o.audio ? 4200 : Math.min(6500, Math.max(1400, 700 + text.length * 32));
-    await sleep(d);
-  }
-  typing(null);
-  const m = { who:'leo', text };
-  if (o.img) m.img = o.img; if (o.audio) m.audio = o.audio; if (o.video) m.video = o.video;
-  push(m);
-  await sleep(500);
+/* ---------- bulles vocales ---------- */
+const voices = {};   // id -> { done:Promise, resolve }
+function voiceUI(m){
+  const box = document.createElement('div'); box.className = 'vo';
+  const b = document.createElement('button'); b.textContent = '▶';
+  const wv = document.createElement('div'); wv.className = 'wv';
+  let seed = m.id * 7; for (let i = 0; i < 26; i++){ seed = (seed * 9301 + 49297) % 233280; const h = 4 + (seed / 233280) * 16; const bar = document.createElement('i'); bar.style.height = h + 'px'; wv.appendChild(bar); }
+  const d = document.createElement('span'); d.className = 'd'; d.textContent = '0:--';
+  box.append(b, wv, d);
+  loadBuf(m.audio).then(buf => { if (buf) d.textContent = '0:' + p2(Math.round(buf.duration)); });
+  b.onclick = () => playVoice(m, box);
+  return box;
 }
-async function burst(lines, gap=1500){ for (const l of lines){ push({ who:'leo', text:T(l) }); await sleep(gap); } }
-async function intrus(text){ glitch(450); await sleep(300); push({ who:'intrus', text:T(text) }); await sleep(800); }
-async function sys(text){ push({ who:'sys', text:T(text) }); await sleep(600); }
-async function ghostTyping(ms){ typing('écrit…'); await sleep(ms); typing(null); }
-function deleteLast(){
-  for (let i = S.log.length-1; i >= 0; i--) if (S.log[i].who === 'leo'){ S.log[i].deleted = true; break; }
-  save(); $('chat').innerHTML = ''; S.log.forEach(m => $('chat').appendChild(build(m))); scrollChat(true);
+function voiceRec(id){ if (!voices[id]){ let r; const p = new Promise(x => r = x); voices[id] = { done: p, resolve: r, h: null }; } return voices[id]; }
+async function playVoice(m, box){
+  audioInit();
+  const v = voiceRec(m.id);
+  if (v.h){ v.h.stop(); v.h = null; return; }
+  const buf = await loadBuf(m.audio); if (!buf) return;
+  if (m.onPlayFn) try { m.onPlayFn(); } catch(e){}
+  const muted = S.flags.comfort && m.who !== 'player';
+  const h = playBuf(buf, { gain: muted ? 0 : 1, bus: voiceBus }); v.h = h; playing.add(h);
+  box = box || ($('m' + m.id) && $('m' + m.id).querySelector('.vo'));
+  const bars = box ? [...box.querySelectorAll('.wv i')] : [], btn = box && box.querySelector('button');
+  if (btn) btn.textContent = '■';
+  const iv = setInterval(() => { const p = (AC.currentTime - h.t0) / buf.duration; bars.forEach((x,i) => x.classList.toggle('p', i / bars.length < p)); }, 120);
+  await h.ended; clearInterval(iv); playing.delete(h);
+  if (btn) btn.textContent = '▶'; bars.forEach(x => x.classList.remove('p'));
+  if (v.h === h){ v.h = null; v.resolve(true); }
 }
-function glitch(ms=700){ document.body.classList.add('glitch'); sfx.glitch(); if (navigator.vibrate) navigator.vibrate(200); setTimeout(()=>document.body.classList.remove('glitch'), ms); }
+function voiceDone(m, ms){ if (!m) return sleep(0); return Promise.race([voiceRec(m.id).done, sleep(ms)]); }
 
-/* dossiers */
+/* ---------- photos ---------- */
+function openPhoto(m){
+  const firstPair = m.pair && !S.flags['seen_' + m.id];
+  openLbImg(firstPair ? m.img : (m.pair || m.img), 'Photo · L-511', () => {
+    if (firstPair){ S.flags['seen_' + m.id] = 1; save(); rerender(m); }
+  });
+}
+
+/* ---------- visionneuse ---------- */
+let lbClose = null;
+function openLbImg(key, title, onClose){
+  const sc = $('lbScroll'); sc.className = ''; sc.innerHTML = ''; sc.appendChild(imgEl(key));
+  $('lbT').textContent = title || ''; $('lbZ').classList.remove('hide'); lbClose = onClose || null; showOv('lb');
+}
+function openLbHtml(node, title, onClose){
+  const sc = $('lbScroll'); sc.className = 'html'; sc.innerHTML = ''; sc.appendChild(node);
+  $('lbT').textContent = title || ''; $('lbZ').classList.add('hide'); lbClose = onClose || null; showOv('lb');
+}
+$('lbZ').onclick = () => $('lbScroll').classList.toggle('zoom');
+$('lbX').onclick = () => { hideOv('lb'); const f = lbClose; lbClose = null; if (f) f(); };
+let lastTap = 0;
+$('lbScroll').addEventListener('click', () => { if ($('lbScroll').classList.contains('html')) return; const t = Date.now(); if (t - lastTap < 320){ $('lbScroll').classList.toggle('zoom'); lastTap = 0; } else lastTap = t; });
+function showOv(id){ $(id).classList.add('on'); }
+function hideOv(id){ $(id).classList.remove('on'); }
+
+/* ---------- relevés (terminal VEILLE) ---------- */
+function terminal(poste, sub, lines, last, { typed = false, onLine = null } = {}){
+  const t = document.createElement('div'); t.className = 'term';
+  const head = [`<div class="h">VEILLE · JOURNAL DE SESSION ARCHIVÉ — POSTE #${poste}</div>`, `<div>${sub}</div>`, `<div class="sep">──────────────────────────────────────────────</div>`];
+  t.innerHTML = head.join('');
+  const rows = lines.map(([h, txt, cls]) => { const d = document.createElement('div'); d.textContent = `${h} – ${txt}`; if (cls) d.className = cls; return d; });
+  const lastD = document.createElement('div'); lastD.style.marginTop = '12px'; lastD.innerHTML = '<span></span><span class="cur">▌</span>'; lastD.firstChild.textContent = last;
+  if (!typed){ rows.forEach(r => t.appendChild(r)); t.appendChild(lastD); return t; }
+  (async () => {
+    for (let i = 0; i < rows.length; i++){ await rawSleep(480 * Math.max(F, .3)); if (!t.isConnected) return; t.appendChild(rows[i]); sfx.key(); if (onLine) onLine(lines[i]); }
+    await rawSleep(500); if (t.isConnected) t.appendChild(lastD);
+  })();
+  return t;
+}
+function r42(text, cls = '', ts = Date.now()){ S.r42.push({ ts, text, cls }); save(); }
+function r42lines(){ return S.r42.slice().sort((a,b) => a.ts - b.ts).map(e => [hms(e.ts), e.text, e.cls]); }
+function rel42(typed){ return terminal('42', `ID : V-042 · Site : SS-B · Relève de nuit · Réf. ${ref()}`, r42lines(), S.r42last || '', { typed }); }
+function rel41(typed, onLine){ return terminal('41', 'ID : V-041 · Site : SS-B · Relève de nuit', R41, R41_LAST, { typed, onLine }); }
+function showRel(typed){
+  $('relX').textContent = 'VEILLE'; $('relBody').innerHTML = ''; $('relBody').appendChild(rel42(typed)); showOv('rel');
+}
+$('relX').onclick = () => { tapReset(); if (S.ended && !S.started) hideOv('rel'); else if (S.ended && $('app').classList.contains('hide')) hideOv('rel'); };
+
+/* ---------- dossiers ---------- */
 async function addDoc(id, quiet){
   if (!S.docs.includes(id)){ S.docs.push(id); save(); renderDocs(); }
-  if (!quiet) push({ who:'sys', doc:id });
-  badge('docs', 1); toast('📁 Nouveau dossier'); await sleep(700);
+  if (!quiet) await journal('Dossier versé · ' + DOCS[id].title);
+  badge('docs', 1); await sleep(500);
 }
 function renderDocs(){
   const box = $('docs'); box.innerHTML = '';
   if (!S.docs.length){ box.innerHTML = '<div class="empty">AUCUN DOSSIER</div>'; return; }
   S.docs.forEach(id => {
     const d = DOCS[id], b = document.createElement('button'); b.className = 'doc';
-    b.innerHTML = `<img src="${d.src}" alt=""><div><b></b><small>TOUCHER POUR OUVRIR</small></div>`;
-    b.querySelector('b').textContent = d.title; b.onclick = () => openDoc(id); box.appendChild(b);
+    const th = document.createElement('div'); th.className = 'th';
+    if (d.img){ const i = imgEl(d.img); i.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:4px'; th.appendChild(i); }
+    else th.textContent = d.type === 'audio' ? '▶ AUDIO' : d.type === 'badges' ? 'BADGES' : 'VEILLE';
+    const tx = document.createElement('div'); tx.innerHTML = '<b></b><small>TOUCHER POUR OUVRIR</small>'; tx.querySelector('b').textContent = d.title;
+    b.append(th, tx); b.onclick = () => openDoc(id); box.appendChild(b);
   });
 }
-function openDoc(id){ openLb(DOCS[id].src, DOCS[id].title); }
-function openLb(src, title){ $('lbImg').src = src; $('lbT').textContent = title || ''; $('lbScroll').classList.remove('zoom'); showOv('lb'); }
-function zoom(){ $('lbScroll').classList.toggle('zoom'); }
-let lastTap = 0;
-$('lbScroll').addEventListener('click', () => { const t = Date.now(); if (t - lastTap < 320){ zoom(); lastTap = 0; } else lastTap = t; });
-function showOv(id){ $(id).classList.add('on'); }
-function hideOv(id){ $(id).classList.remove('on'); }
+const openedAt = {};
+function openDoc(id){
+  const d = DOCS[id]; openedAt[id] = Date.now(); S.flags['open_' + id] = (S.flags['open_' + id] || 0) + 1; save();
+  const close = () => docClosed(id);
+  if (d.img) return openLbImg(d.img, d.title, close);
+  if (d.type === 'badges') return openLbHtml(badgesView(), d.title, close);
+  if (d.type === 'audio'){ const m = { id: 9000 + Object.keys(DOCS).indexOf(id), audio: d.audio, who: 'doc' }; const w = document.createElement('div'); w.className = 'term'; w.innerHTML = '<div class="h">ARCHIVE INTERPHONE · SS-B</div><div>Enregistrement automatique · 19:40:12 · durée 00:24</div><div class="sep">──────────────────────</div>'; const v = voiceUI(m); v.style.marginTop = '12px'; w.appendChild(v); return openLbHtml(w, d.title, close); }
+  if (d.type === 'r41'){
+    const typed = !S.flags.r41typed; S.flags.r41typed = 1; save();
+    if (S.flags.obsR41 && S.flags['open_r41'] >= 3) observe('Relevé #41 consulté · journal de session #42 en cours');
+    return openLbHtml(rel41(typed, l => { if (l[0] === '23:57:49') trap8a(); }), d.title, close);
+  }
+  if (d.type === 'r42') return openLbHtml(rel42(false), d.title, close);
+}
+function docClosed(id){
+  const dt = (Date.now() - (openedAt[id] || Date.now())) / 1000;
+  if (id === 'badges' && S.flags.obsBadges && dt > 45) observe('Journal des badges · consultation prolongée · opérateur #42');
+  if (id === 'r41' && S.flags.obsR41 && dt > 45) observe('Relevé #41 consulté · journal de session #42 en cours');
+  if (id === 'badges' && S.flags.p6b && !S.flags.p6bDone){ S.flags.p6bDone = 1; save(); ouvreLui(); }
+}
+function badgesView(){
+  const w = document.createElement('div'); w.className = 'term';
+  w.innerHTML = `<div class="h">CENTRE D'ARCHIVES NORD — JOURNAL BADGES (SS-B)</div><div>STATUT CAMÉRAS : HORS LIGNE</div>`;
+  const tb = document.createElement('table');
+  tb.innerHTML = '<tr><th>NOM</th><th>BADGE</th><th>ENTRÉE</th><th>SORTIE</th><th>STATUT</th></tr>';
+  BADGES.forEach(r => { const tr = document.createElement('tr'); r.forEach(c => { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); }); tb.appendChild(tr); });
+  if (S.flags.p6b){
+    const tr = document.createElement('tr'); const td0 = document.createElement('td');
+    if (MEM.badge){ const i = new Image(); i.src = MEM.badge; td0.appendChild(i); }
+    td0.appendChild(document.createTextNode(S.name.toUpperCase()));
+    tr.appendChild(td0);
+    ['#42', hhmm(new Date(S.t0)), '--:--', 'EN COURS'].forEach((c, k) => { const td = document.createElement('td'); td.textContent = c; if (k === 3) td.className = 'enc'; tr.appendChild(td); });
+    tb.appendChild(tr);
+  }
+  w.appendChild(tb);
+  const n = document.createElement('div'); n.innerHTML = '*Alerte : Badge J-732 désactivé le 12/09. Forçage manuel détecté sur lecteur SS-B.<br><br>NOTE SÉCURITÉ : Code porte arrière Local Technique = Matricule du Chef de site (3 chiffres + #).';
+  w.appendChild(n); return w;
+}
+function ouvreLui(){   // Piège 6b : un ancien message a changé
+  let m = S.log.find(x => x.who === 'direct' && x.text === 'Envoie-le.') || S.log.find(x => x.who === 'faux');
+  if (!m) return; m.text = 'Ouvre-lui'; save(); rerender(m);
+}
+function observe(text){ if (S.obsN >= 2) return; S.obsN++; S.flags['obs_' + text.slice(0,12)] = 1; save(); journal(text); }
 
-/* caméras */
+/* ---------- caméras ---------- */
+function camKey(c){
+  const st = S.cams[c.id] || {};
+  if (c.id === 'c1' && S.flags.periphShown && !S.flags.periphDone) return 'cam01_sil';
+  return st.src || c.src;
+}
 function renderCams(){
   const box = $('cams'); box.innerHTML = '';
   CAMS.forEach(c => {
     const st = S.cams[c.id] || {};
-    const d = document.createElement('div'); d.className = 'cam' + (st.off ? ' off' : ''); d.id = 'cam-'+c.id;
-    d.innerHTML = `<img src="${st.src || c.src}" alt=""><canvas class="noise" width="60" height="80"></canvas><div class="lbl">${c.label}</div><div class="clk"></div><div class="lost">SIGNAL<br>PERDU</div>`;
+    const d = document.createElement('div'); d.className = 'cam' + (st.off ? ' off' : ''); d.id = 'cam-' + c.id;
+    if (c.id === 'c0'){ if (S.flags.portrait && MEM.portrait){ const i = new Image(); i.src = MEM.portrait; d.appendChild(i); } }
+    else d.appendChild(imgEl(camKey(c)));
+    d.insertAdjacentHTML('beforeend', `<canvas class="noise" width="60" height="45"></canvas><div class="lbl">${c.label}</div><div class="rc rec">●</div><div class="clk"></div><div class="lost">SIGNAL<br>PERDU</div>`);
+    d.onclick = () => camOpen(c);
     box.appendChild(d); noiseLoop(d.querySelector('canvas'));
   });
 }
-function camLost(id){ S.cams[id] = { off:true }; save(); const e = $('cam-'+id); if (e) e.classList.add('off'); if (view !== 'cams') badge('cams', 1); }
-function camBack(id, src){ S.cams[id] = { off:false, src }; save(); const e = $('cam-'+id); if (e){ e.classList.remove('off'); e.querySelector('img').src = src; } if (view !== 'cams') badge('cams', 1); }
-function tickClock(){
-  const t = hhmm(new Date()); $('clk').textContent = t;
-  const sec = new Date().toLocaleTimeString('fr-FR');
+function camSet(id, o){ S.cams[id] = Object.assign({}, S.cams[id] || {}, o); save(); renderCams(); if (view !== 'cams') badge('cams', 1); }
+let cvTimer = null;
+function camOpen(c){
+  const st = S.cams[c.id] || {};
+  if (st.off) return;
+  if (c.id === 'c0' && S.flags.portrait) observe('CAM 00 · consultation opérateur #42 · archivé R-9');
+  let key = (S.cams[c.id] || {}).src || c.src;
+  if (c.id === 'c1' && S.flags.periphShown && !S.flags.periphDone){ S.flags.periphDone = 1; save(); key = 'cam01_vide'; }
+  $('cvL').textContent = c.label.split(' · ')[0] + ' · SS-B'; $('cvT').textContent = c.label;
+  const img = $('cvImg');
+  if (c.id === 'c0'){ if (S.flags.portrait && MEM.portrait) img.src = MEM.portrait; else img.removeAttribute('src'); }
+  else setImg(img, key);
+  showOv('cv');
+  clearTimeout(cvTimer);
+  if (c.id === 'c3' && S.flags.cam03 === 1){
+    cvTimer = setTimeout(() => {
+      setImg(img, 'cam03_obj');
+      cvTimer = setTimeout(() => { setImg(img, 'cam03_vide'); S.flags.cam03 = 2; save(); camSet('c3', { src: 'cam03_vide' }); }, 800);
+    }, 3500);
+  }
+}
+$('cvX').onclick = () => { clearTimeout(cvTimer); hideOv('cv'); renderCams(); };
+
+/* ---------- horloge et chrono ---------- */
+function tick(){
+  if (frozen) return;
+  const now = new Date(); $('clk').textContent = hhmm(now);
+  const sec = hms(now);
   document.querySelectorAll('.cam .clk').forEach(c => c.textContent = sec);
-  if ($('c0t')) $('c0t').textContent = sec;
-  if (S.chronoEnd){
+  $('cvC').textContent = sec; $('caC').textContent = sec;
+  if (S.chronoEnd && !S.ended){
     const left = (S.chronoEnd - Date.now()) / 1000;
-    $('chrono').style.display = 'block'; $('chrono').textContent = '⏱ ' + fmt(left);
-    if (left <= 0 && !tickClock.over){ tickClock.over = true; abortAll(new GameOver('silence')); }
+    $('chrono').style.display = 'block'; $('chrono').textContent = 'L-511 · ' + mmss(left);
+    if (left <= 0 && !tick.over){ tick.over = true; abortAll(new GameOver('silence')); }
   } else $('chrono').style.display = 'none';
 }
+let relances = [];
+function startChrono(sec){
+  if (!S.chronoEnd){ S.chronoEnd = Date.now() + sec * 1000 * F; save(); }
+  tick.over = false; relances.forEach(clearTimeout);
+  const lines = [["jentends ses pas dépêche toi"], ["il est là", "il est là", "aide moi"]];
+  relances = [90, 180].map((s, i) => setTimeout(() => { if (S.chronoEnd && !S.ended) lines[i].forEach((l, j) => setTimeout(() => push({ who:'leo', text:l }), j * 700)); }, s * 1000 * F));
+}
+function stopChrono(){ S.chronoEnd = 0; save(); relances.forEach(clearTimeout); tick(); }
+function chronoPenalty(s){ if (S.chronoEnd){ S.chronoEnd -= s * 1000 * F; save(); tick(); } }
+
+/* =========================================================
+   API DE L'HISTOIRE
+   ========================================================= */
+async function leo(text, o = {}){
+  text = T(text);
+  if (RM === 'auto') markRead();
+  if (!o.fast){
+    typing(o.typingLabel || 'écrit…');
+    const d = o.audio ? 3800 : Math.min(6000, Math.max(1300, 650 + text.length * 30));
+    await sleep(d);
+  }
+  typing(null);
+  const m = { who: 'leo', text };
+  if (o.img) m.img = o.img; if (o.pair) m.pair = o.pair; if (o.audio) m.audio = o.audio;
+  push(m);
+  if (o.onPlay) m.onPlayFn = o.onPlay;
+  if (o.autoplay) playVoice(m);
+  await sleep(450);
+  return m;
+}
+async function faux(text){ markRead(); const m = push({ who: 'faux', text: T(text) }); await sleep(500); return m; }
+async function burst(lines, gap = 1500){ for (const l of lines){ markRead(); push({ who:'leo', text:T(l) }); await sleep(gap); } }
+async function journal(text){ push({ who:'log', text: hms() + ' · ' + T(text) }); await rawSleep(400 * F); }
+async function direct(text, tag){ const m = { who:'direct', text:T(text) }; if (tag) m.tag = tag; push(m); await rawSleep(600 * F); }
+async function ghostTyping(ms){ typing('écrit…'); await sleep(ms); typing(null); }
+function deleteLast(){ for (let i = S.log.length - 1; i >= 0; i--) if (S.log[i].who === 'leo'){ S.log[i].deleted = true; save(); rerender(S.log[i]); break; } }
+function microGlitch(){ document.body.classList.add('mg'); tone(90,.08,.04,'sawtooth'); setTimeout(() => document.body.classList.remove('mg'), 140); }
+function archivePortrait(url, caption){ push({ who:'archive', text: caption }); }
+function cutChat(){ $('msg').disabled = true; $('send').disabled = true; $('msg').placeholder = 'Liaison L-511 terminée'; }
 
 /* ---------- réponses du joueur ---------- */
 const waiters = [];
+let sab = null;
 $('form').addEventListener('submit', e => {
-  e.preventDefault(); const v = $('msg').value.trim(); if (!v) return;
-  $('msg').value = ''; push({ who:'player', text:v });
+  e.preventDefault(); let v = $('msg').value.trim(); if (!v || $('msg').disabled) return;
+  $('msg').value = ''; maxLen = 0; lastInput = Date.now();
+  if (sab){ v = sab.text; const f = sab.done; sab = null; push({ who:'player', text:v }); f(); return; }
+  push({ who:'player', text:v });
+  if (RM === 'instant') markRead();
+  else if (RM === 'auto') setTimeout(() => { if (RM === 'auto') markRead(); }, 2200);
   const w = waiters.splice(0); w.forEach(fn => fn(v));
 });
-function reply(timeout=60000){
+function reply(timeout = 60000){
   return cancellable(done => {
     let t = null; const fn = v => { clearTimeout(t); done(v); };
     waiters.push(fn);
-    if (timeout) t = setTimeout(() => { const i = waiters.indexOf(fn); if (i >= 0) waiters.splice(i,1); done(null); }, timeout * F);
+    if (timeout) t = setTimeout(() => { const i = waiters.indexOf(fn); if (i >= 0) waiters.splice(i, 1); done(null); }, timeout * F);
   });
 }
 async function ask({ ok, hints = [], idle = 110000 }){
@@ -520,193 +929,425 @@ async function ask({ ok, hints = [], idle = 110000 }){
   while (true){
     const r = await reply(idle);
     if (r && ok.some(re => re.test(norm(r)))) return r;
-    if (!r && h >= hints.length + 1) continue;               // plus d'indice à donner : on attend sans spammer
-    if (hints.length){ await leo(r || h < hints.length ? hints[Math.min(h, hints.length-1)] : "T'es toujours là ? Réponds-moi stp…"); h++; S.hints++; save(); }
+    if (!r && h >= hints.length + 1) continue;
+    if (hints.length){ await leo(r || h < hints.length ? hints[Math.min(h, hints.length - 1)] : "tes toujours là ? reponds moi stp"); h++; }
   }
 }
 function choice(opts, { idle = 0, hint = '' } = {}){
   const box = document.createElement('div'); box.className = 'choices';
-  let hinted = false, t = null;
+  let t = null;
   const p = cancellable(done => {
-    const finish = v => { clearTimeout(t); box.remove(); const i = waiters.indexOf(onText); if (i>=0) waiters.splice(i,1); done(v); };
-    opts.forEach(o => { const b = document.createElement('button'); b.textContent = o.label; b.onclick = () => { push({ who:'player', text:o.label.replace(/^\S+\s/, '') }); finish(o.value); }; box.appendChild(b); });
+    const finish = v => { clearTimeout(t); box.remove(); const i = waiters.indexOf(onText); if (i >= 0) waiters.splice(i, 1); done(v); };
+    opts.forEach(o => { const b = document.createElement('button'); b.textContent = o.label; b.onclick = () => { push({ who:'player', text:o.label }); markRead(); finish(o.value); }; box.appendChild(b); });
     const onText = v => { const n = norm(v); const o = opts.find(o => o.match && o.match.test(n)); if (o) finish(o.value); else waiters.push(onText); };
     waiters.push(onText);
-    if (idle && hint) t = setTimeout(() => { if (!hinted){ hinted = true; S.hints++; leo(hint).catch(()=>{}); } }, idle * F);
+    if (idle && hint) t = setTimeout(() => { leo(hint, { fast: true }).catch(()=>{}); }, idle * F);
   });
   $('chat').appendChild(box); scrollChat(true);
   p.catch(() => box.remove());
   return p;
 }
+function sabotage(text, ms){
+  return cancellable(done => {
+    let t = setTimeout(() => { if (sab){ sab = null; push({ who:'player', text }); done(); } }, ms * F);
+    sab = { text, done: () => { clearTimeout(t); done(); } };
+  });
+}
 
 /* ---------- pavé numérique ---------- */
 let KP = null;
-function keypad({ title, sub = '', code, hints = [], maxWrong = Infinity }){
+function keypad({ title, sub = '', code, hints = [], maxWrong = Infinity, priority = false }){
   return cancellable(done => {
-    KP = { code: code.map(norm), hints, maxWrong, wrong:0, val:'', done };
-    $('kpT').textContent = title; $('kpS').textContent = sub; $('kpD').textContent = ''; $('kpL').textContent = '';
+    KP = { code: code.map(norm), hints, maxWrong, wrong: 0, val: '', done, priority, prio: false };
+    $('kpT').textContent = title; $('kpS').textContent = sub; $('kpD').textContent = ''; $('kpD').className = 'kp-d'; $('kpL').textContent = '';
     $('kpBtn').classList.remove('hide'); showOv('kp');
+    if (priority) KP.pt = setTimeout(() => prioUnlock(KP), 6000 * Math.max(F, .3));
   });
 }
-function openKp(){ if (KP) showOv('kp'); }
+function prioUnlock(k){
+  if (KP !== k || k.prio) return; k.prio = true; clearTimeout(k.pt);
+  S.flags.prioT = Date.now(); save();
+  $('kpD').className = 'kp-d prio'; $('kpD').textContent = 'DÉVERROUILLAGE PRIORITAIRE : DIRECTION'; sfx.ok();
+  journal('Déverrouillage prioritaire S.14 : DIRECTION');
+  setTimeout(() => { KP = null; $('kpBtn').classList.add('hide'); hideOv('kp'); k.done('priority'); }, 2200);
+}
+$('kpBtn').onclick = () => { if (KP) showOv('kp'); };
+$('kpX').onclick = () => hideOv('kp');
 (function buildKp(){
   const g = $('kpG');
   ['1','2','3','4','5','6','7','8','9','#','0','⌫'].forEach(k => {
     const b = document.createElement('button'); b.textContent = k;
-    b.onclick = () => { if (!KP) return; if (k === '⌫') KP.val = KP.val.slice(0,-1); else if (KP.val.length < 6) KP.val += k; $('kpD').textContent = KP.val; $('kpD').classList.remove('bad'); tone(1200,.04,.05,'square'); };
+    b.onclick = () => { if (!KP || KP.prio) return; if (k === '⌫') KP.val = KP.val.slice(0,-1); else if (KP.val.length < 6) KP.val += k; $('kpD').textContent = KP.val; $('kpD').classList.remove('bad'); sfx.key(); if (KP.priority && KP.val.length >= 2) prioUnlock(KP); };
     g.appendChild(b);
   });
   const ok = document.createElement('button'); ok.className = 'go'; ok.textContent = 'ENVOYER'; ok.style.gridColumn = '1 / -1';
   ok.onclick = kpSubmit; g.appendChild(ok);
 })();
-async function kpSubmit(){
-  if (!KP || !KP.val) return;
+function kpSubmit(){
+  if (!KP || !KP.val || KP.prio) return;
   const v = KP.val, k = KP;
   if (k.code.includes(v)){
-    tone(988,.12,.12); tone(1318,.2,.12,'sine',.12);
-    $('kpD').textContent = '✓ ACCEPTÉ'; KP = null; $('kpBtn').classList.add('hide');
+    sfx.ok(); $('kpD').textContent = 'ACCEPTÉ'; KP = null; $('kpBtn').classList.add('hide');
     setTimeout(() => { hideOv('kp'); k.done('ok'); }, 700);
     return;
   }
-  k.wrong++; tone(180,.35,.25,'square'); $('kpD').classList.add('bad'); $('kpD').textContent = '✕ REFUSÉ';
-  push({ who:'sys', text:`Code refusé : ${v}` });
-  setTimeout(()=>{ if (KP === k){ k.val=''; $('kpD').textContent=''; $('kpD').classList.remove('bad'); } }, 900);
-  if (k.wrong >= k.maxWrong){ KP = null; $('kpBtn').classList.add('hide'); setTimeout(()=>{ hideOv('kp'); k.done('fail'); }, 900); return; }
+  k.wrong++; sfx.ko(); $('kpD').classList.add('bad'); $('kpD').textContent = 'REFUSÉ';
+  journal('Code refusé · ' + v);
+  setTimeout(() => { if (KP === k){ k.val = ''; $('kpD').textContent = ''; $('kpD').classList.remove('bad'); } }, 900);
+  if (k.wrong >= k.maxWrong){ KP = null; $('kpBtn').classList.add('hide'); setTimeout(() => { hideOv('kp'); k.done('fail'); }, 900); return; }
   if (k.hints.length){
-    const h = T(k.hints[Math.min(k.wrong-1, k.hints.length-1)]); S.hints++; save();
+    const h = T(k.hints[Math.min(k.wrong - 1, k.hints.length - 1)]);
     setTimeout(() => { push({ who:'leo', text:h }); $('kpL').textContent = 'Léo : ' + h; }, 1300 * Math.max(F, .3));
   }
 }
 
-/* ---------- chrono final ---------- */
-let relances = [];
-function startChrono(sec){
-  if (!S.chronoEnd){ S.chronoEnd = Date.now() + sec*1000*F; save(); }
-  tickClock.over = false;
-  relances.forEach(clearTimeout);
-  const lines = [["J'entends ses pas, dépêche-toi !!"], ["il est là","il est là","IL EST LÀ","aide moi"]];
-  relances = [90, 180].map((s, i) => setTimeout(() => { if (S.chronoEnd) lines[i].forEach((l,j)=> setTimeout(()=>push({who:'leo', text:l}), j*700)); }, s*1000*F));
-}
-function stopChrono(){ S.chronoEnd = 0; save(); relances.forEach(clearTimeout); tickClock(); }
-
-/* ---------- appel ---------- */
-let callDone = null, ringT = null, missT = null, callAudio = null;
-function fakeCall({ title, audio }){
-  return cancellable(done => {
-    callDone = done; $('callT').textContent = title; $('callS').textContent = 'Appel entrant…'; $('callA').classList.remove('hide');
-    showOv('call'); sfx.ring(); if (navigator.vibrate) navigator.vibrate([500,250,500]);
-    ringT = setInterval(() => { sfx.ring(); if (navigator.vibrate) navigator.vibrate([500,250,500]); }, 2600);
-    missT = setTimeout(() => callEnd('missed'), 25000 * Math.max(F,.2));
-    callAudio = audio;
-  });
-}
-function callAnswer(){
-  clearInterval(ringT); clearTimeout(missT);
-  $('callS').textContent = '00:00'; $('callA').classList.add('hide');
-  const a = media1 || new Audio(); a.src = callAudio; a.volume = 1; a.currentTime = 0;
-  let s = 0; const ti = setInterval(()=>{ s++; $('callS').textContent = fmt(s); }, 1000);
-  a.onended = () => { clearInterval(ti); setTimeout(()=>callEnd('answered'), 400); };
-  a.play().catch(() => { clearInterval(ti); callEnd('answered'); });
-}
-function callEnd(r){
-  clearInterval(ringT); clearTimeout(missT); if (navigator.vibrate) navigator.vibrate(0);
-  if (media1) try { media1.pause(); } catch(e){}
-  hideOv('call'); if (r !== 'answered') push({ who:'sys', text:'📞 Appel manqué — Léo · Interphone' });
-  const d = callDone; callDone = null; if (d) d(r);
+/* =========================================================
+   PIÈGES TRANSVERSAUX
+   ========================================================= */
+/* Piège 2 — punir la fuite */
+let hiddenAt = 0, crashing = false, running = false, inBinaural = null;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden){ hiddenAt = Date.now(); if (inBinaural) inBinaural(); return; }
+  if (S.started && !S.ended) keepAwake();
+  if (!hiddenAt) return;
+  const d = (Date.now() - hiddenAt) / 1000, from = hiddenAt; hiddenAt = 0;
+  if (d > 5 && running && S.flags.p2 && !crashing && !S.ended) absence(Math.round(d), from);
+});
+function absence(X, from){
+  S.absN++; save();
+  r42(`Absence opérateur détectée (${mmss(X)})`, '', from);
+  if (S.chronoEnd){ journal(`Absence poste #42 · ${X} s · L-511 : −${X} s`); chronoPenalty(X); return; }
+  const n = S.absN, c = chap();
+  if (n === 1){
+    toast(`VEILLE · Absence poste #42 journalisée · ${X} s`, 4000);
+    if (c < 6) push({ who:'leo', text:'tes encore là ?? repond stp me laisse pas tout seul en bas' });
+    else journal(`Absence poste #42 · ${X} s · L-511 sans supervision`);
+  } else if (n === 2){
+    if (c < 7) journal('Absence poste #42 · 2e occurrence · signalée Direction');
+    else journal(`Absence poste #42 · écran verrouillé · ${S.local} · porte : ${S.porte} (déclaré)`);
+  } else if (n === 3) journal('Absence poste #42 · 3e occurrence · conforme relevé #41');
+  else journal(`Absence poste #42 · ${n}e occurrence · journal de session mis à jour`);
 }
 
-/* ---------- caméra 0 ---------- */
-async function cam0(text){
-  const st = await getCam();
-  if (st){ $('c0v').srcObject = st; $('c0v').classList.remove('hide'); $('c0fb').classList.add('hide'); try { await $('c0v').play(); } catch(e){} }
-  else { $('c0v').classList.add('hide'); $('c0fb').classList.remove('hide'); }
-  $('c0s').textContent = ''; showOv('cam0'); noise(.4,.15,4000);
-  await sleep(5500);
-  const say = T(text); for (let i = 1; i <= say.length; i++){ $('c0s').textContent = say.slice(0,i); tone(1500,.02,.03,'square'); await sleep(70); }
-  await sleep(2600);
-  sfx.bang(); glitch(500); $('c0s').textContent = '';
-  await sleep(450);
-  hideOv('cam0');
+/* Piège 3 — lire avant l'envoi, et l'hésitation */
+let maxLen = 0, lastInput = Date.now(), focusAt = 0;
+$('msg').addEventListener('input', () => {
+  const L = $('msg').value.length; lastInput = Date.now();
+  if (L > maxLen) maxLen = L;
+  if (L === 0 && maxLen > 0){ erased(maxLen); maxLen = 0; }
+});
+$('msg').addEventListener('focus', () => { focusAt = Date.now(); });
+function erased(n){
+  if (n >= 4) r42(`Saisie opérateur effacée (${n} car.)`);
+  if (!S.flags.p3) return;
+  if (!S.flags.p3first){ if (n > 15){ S.flags.p3first = Date.now(); save(); direct('Envoie-le.', 'LIAISON INCONNUE'); } }
+  else if (!S.flags.p3second && n >= 4){ S.flags.p3second = 1; save(); journal(`Saisie opérateur effacée · ${n} caractères · archivée`); }
 }
+setInterval(() => {
+  if (!S.flags.p3 || S.flags.hes || S.ended || chap() > 10) return;
+  if (document.activeElement === $('msg') && !$('msg').value && Date.now() - Math.max(focusAt, lastInput) > 20000){
+    S.flags.hes = 1; save();
+    push({ who:'leo', text:'tu tapes depuis tout a lheure jvois les petits points' });
+    setTimeout(() => push({ who:'leo', text:'dis moi quelque chose' }), 1600);
+  }
+}, 1000);
 
-/* ---------- jump scare ---------- */
-async function jumpScare(){ showOv('js'); sfx.bang(); if (navigator.vibrate) navigator.vibrate([300,80,300]); await sleep(650); hideOv('js'); glitch(400); }
-
-/* ---------- silence (micro, ou écran) ---------- */
-function silenceTest(sec){
-  return cancellable(done => {
-    let stream = null, analyser = null, iv = null, mode = null, loud = 0, base = 0, frames = 0, left = sec;
-    const ov = $('sil'); $('silCd').textContent = ''; $('silM').style.width = '0';
-    $('silP').textContent = 'Il est juste derrière la porte. Ton micro d\'interphone est ouvert : pas un mot, pas un souffle.';
-    $('silBtn').classList.remove('hide'); showOv('sil');
-    const finish = r => { clearInterval(iv); clearTimeout(fb); if (stream) stream.getTracks().forEach(t=>t.stop()); document.removeEventListener('pointerdown', onTouch, true); hideOv('sil'); done(r); };
-    const onTouch = e => { if (mode === 'touch'){ e.stopPropagation(); finish('heard'); } };
-    const start = m => {
-      mode = m; $('silBtn').classList.add('hide');
-      if (m === 'touch') { $('silP').textContent = 'Micro indisponible. Ne touche PLUS ton écran. Il écoute.'; setTimeout(()=>document.addEventListener('pointerdown', onTouch, true), 400); }
-      $('silCd').textContent = left;
-      iv = setInterval(() => {
-        if (mode === 'mic'){
-          const a = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(a);
-          let r = 0; for (const x of a) r += x*x; r = Math.sqrt(r/a.length);
-          frames++; if (frames < 12) base = Math.max(base, r);
-          const thr = Math.max(0.035, base * 3.2);
-          $('silM').style.width = Math.min(100, r/thr*100) + '%'; $('silM').style.background = r > thr*.7 ? 'var(--red)' : 'var(--green)';
-          if (frames > 12 && r > thr){ loud++; if (loud >= 3) return finish('heard'); } else loud = Math.max(0, loud-1);
-        }
-        if (frames % 10 === 0 || mode === 'touch'){ }
-      }, 100);
-      const cd = setInterval(() => { left--; $('silCd').textContent = Math.max(0,left); if (left <= 0){ clearInterval(cd); finish('ok'); } }, 1000 * Math.max(F,.05));
-    };
-    $('silBtn').onclick = async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
-        audioInit(); const src = AC.createMediaStreamSource(stream); analyser = AC.createAnalyser(); analyser.fftSize = 1024; src.connect(analyser);
-        start('mic');
-      } catch(e){ start('touch'); }
-    };
-    const fb = setTimeout(() => { if (!mode) start('touch'); }, 20000 * Math.max(F,.2));
-  });
-}
-
-/* ---------- fins ---------- */
-function showEnd(id){
-  const e = ENDINGS[id]; S.ended = id; save();
-  $('endN').textContent = `FIN ${e.n} / 4`; $('endT').textContent = e.title; $('endP').textContent = T(e.text);
-  const mn = Math.round((Date.now() - S.t0) / 60000);
-  $('endS').textContent = `Durée : ${mn} min · indices reçus : ${S.hints}`;
-  showOv('end');
+/* Piège 8a — bruit domestique, 3 s après la ligne 23:57:49 du relevé #41 */
+function trap8a(){
+  if (S.flags.p8done || !S.flags.obsR41) return;
+  S.flags.p8done = 1; save();
+  setTimeout(async () => {
+    nappe.cut();
+    await rawSleep(300);
+    const seul = S.seul !== false;
+    r42(`Micro opérateur : bruit de ${seul ? 'poignée' : 'pas'} détecté`);
+    play(seul ? 'a4_poignee' : 'a4_parquet');
+    if (!seul) setTimeout(() => journal('Présence secondaire déclarée · non vérifiée'), 4000);
+    setTimeout(() => nappe.back(), 9000);
+  }, 3000);
 }
 
 /* =========================================================
-   DÉROULÉ
+   SÉQUENCES SPÉCIALES
+   ========================================================= */
+/* Ch. 5 — Caméra active #1 : forcer CAM 02 par flashs */
+function traversal(){
+  return cancellable(done => {
+    const box = $('caBox'), ctl = $('caCtl');
+    box.querySelectorAll('img').forEach(i => i.remove());
+    const iv0 = imgEl('cam02_vide'), iS = imgEl('cam02_sil'); box.prepend(iv0, iS);
+    $('caL').textContent = 'CAM 02 · SS-B';
+    ctl.innerHTML = '<div class="ca-msg" id="caMsg"></div><button id="caF">FORCER LE FLUX</button><button class="alt" id="caTop">TOP TRAVERSÉE → L-511</button>';
+    $('caMsg').textContent = 'Léo : dis moi quand cest dégagé et jtraverse';
+    showOv('camAct');
+    const t0 = Date.now(), first = 7000 + Math.random() * 4000;
+    const state = () => { const t = Date.now() - t0; if (t < first) return 'sil'; const c = (t - first) % 11000; return c < 6000 ? 'vide' : 'sil'; };
+    let flashed = false;
+    $('caF').onclick = () => {
+      flashed = true; const s = state(); const im = s === 'sil' ? iS : iv0;
+      im.classList.add('on'); tone(2400, .05, .03, 'square');
+      setTimeout(() => im.classList.remove('on'), 380);
+    };
+    const hint = setTimeout(() => { if (!flashed){ $('caMsg').textContent = 'Léo : tu vois quoi ?? force la cam'; push({ who:'leo', text:'tu vois quoi ?? force la cam' }); } }, 20000 * Math.max(F, .3));
+    const end = ok => { clearTimeout(hint); clearTimeout(to); hideOv('camAct'); done(ok); };
+    $('caTop').onclick = () => { push({ who:'player', text:'go' }); end(state() === 'vide'); };
+    const to = setTimeout(() => { push({ who:'leo', text:'jpeux pas rester là jy vais' }); end(false); }, 75000 * Math.max(F, .3));
+  });
+}
+
+/* Ch. 6 — Piège 4 : caméra frontale réactivée en silence (pastille verte) */
+async function camReconnect(){
+  let st = 'unknown';
+  try { st = (await navigator.permissions.query({ name: 'camera' })).state; } catch(e){}
+  if (st !== 'granted'){ await journal('Reconnexion CAM 00 · autorisation opérateur requise'); await sleep(1200); }
+  try { MEM.cam = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ ideal: 720 } }, audio:false }); $('hv').srcObject = MEM.cam; await $('hv').play().catch(()=>{}); }
+  catch(e){ MEM.cam = null; }
+}
+
+/* Ch. 7 — Piège 5 : noir absolu, éclairage piège, capture */
+function grain(src, dark = 1){
+  const c = document.createElement('canvas'); c.width = 360; c.height = 480; const g = c.getContext('2d');
+  g.drawImage(src, 0, 0, 360, 480);
+  const im = g.getImageData(0, 0, 360, 480), x = im.data;
+  for (let i = 0; i < x.length; i += 4){
+    const p = (i / 4), px = p % 360, py = Math.floor(p / 360);
+    let v = (0.3*x[i] + 0.59*x[i+1] + 0.11*x[i+2]) * dark;
+    v = (v - 128) * 1.45 + 118 + (Math.random() - .5) * 60;
+    const r = Math.hypot((px - 180) / 360, (py - 240) / 480); v *= Math.max(0.2, 1.1 - r * 1.3);
+    x[i] = x[i+1] = x[i+2] = Math.max(0, Math.min(255, v));
+  }
+  g.putImageData(im, 0, 0); return c.toDataURL('image/jpeg', .8);
+}
+async function darkCapture(){
+  const ov = $('dark'); ov.style.transition = 'none'; ov.style.background = '#000'; showOv('dark');
+  const v = $('hv'), live = MEM.cam && MEM.cam.active;
+  const small = document.createElement('canvas'); small.width = 90; small.height = 120; const sg = small.getContext('2d', { willReadFrequently: true });
+  const best = document.createElement('canvas'); best.width = 360; best.height = 480; const bg = best.getContext('2d');
+  let score = -1;
+  await rawSleep(3800);
+  ov.style.transition = 'background-color 1.2s linear'; ov.style.background = '#fff';
+  const tEnd = Date.now() + 1200;
+  while (Date.now() < tEnd){
+    if (live && v.videoWidth){
+      sg.drawImage(v, 0, 0, 90, 120); const d = sg.getImageData(0, 0, 90, 120).data; let gsum = 0, b = 0;
+      for (let i = 4; i < d.length; i += 4){ gsum += Math.abs(d[i] - d[i-4]); b += d[i]; }
+      const sc = gsum + b * 0.05;
+      if (sc > score){ score = sc; bg.save(); bg.translate(360, 0); bg.scale(-1, 1); bg.drawImage(v, 0, 0, 360, 480); bg.restore(); }
+    }
+    await new Promise(r => requestAnimationFrame(r));
+  }
+  play('ch7_obtu');
+  let url = null;
+  if (score >= 0) url = grain(best);
+  else if (MEM.badge){ const i = new Image(); i.src = MEM.badge; await new Promise(r => { i.onload = r; i.onerror = r; }); url = grain(i, 0.45); }
+  if (MEM.cam){ MEM.cam.getTracks().forEach(t => t.stop()); MEM.cam = null; }
+  await rawSleep(250);
+  hideOv('dark'); ov.style.transition = 'none'; ov.style.background = '#000';
+  MEM.portrait = url; S.flags.portrait = 1; save(); renderCams();
+  toast('Archive R-9 · portrait opérateur #42', 3500);
+  return url;
+}
+
+/* Ch. 8 — Piège 14 : faux plantage */
+async function fakeCrash(msgs){
+  crashing = true; const ts = Date.now(), t = hhmm();
+  frozen = true; $('app').classList.add('frozen'); hideOv('lb'); hideOv('cv');
+  await rawSleep(1100);
+  showOv('crash'); await rawSleep(4000); hideOv('crash');
+  showOv('load'); await rawSleep(1000); hideOv('load');
+  frozen = false; $('app').classList.remove('frozen'); tick();
+  await journal('Session restaurée · 6 s de flux perdus · cause : inconnue');
+  r42('Interruption de session (00:06). Cause inconnue.', '', ts);
+  markRead();
+  for (const x of msgs){ push({ who:'leo', text: x.text ? T(x.text) : '', img: x.img, t }); await rawSleep(160); }
+  crashing = false;
+}
+
+/* Ch. 9 — l'appel impossible */
+function fakeCall({ title, audio, cues = [] }){
+  return cancellable(done => {
+    let attempts = 0, answeredAt = 0, h = null, timers = [], cuesFired = new Set(), ringIv = null, missT = null;
+    const fire = i => { if (cuesFired.has(i)) return; cuesFired.add(i); try { cues[i][1]().catch(()=>{}); } catch(e){} };
+    const ring = () => {
+      attempts++; $('callT').textContent = title; $('callS').textContent = 'Appel entrant…'; showOv('call');
+      sfx.ring(); ringIv = setInterval(sfx.ring, 2600);
+      missT = setTimeout(() => stopRing('missed'), 25000 * Math.max(F, .2));
+    };
+    const stopRing = r => { clearInterval(ringIv); clearTimeout(missT); hideOv('call'); if (r !== 'answered') after(r); };
+    const after = r => {
+      if (r === 'missed') journal('Appel manqué · ' + title);
+      fire(0);
+      if (attempts < 2) timers.push(setTimeout(ring, 3000)); else finish();
+    };
+    const finish = () => { timers.forEach(clearTimeout); $('callBar').classList.remove('on'); done(); };
+    $('callDec').onclick = () => stopRing('declined');
+    $('callAcc').onclick = async () => {
+      stopRing('answered'); audioInit(); answeredAt = Date.now();
+      $('cbT').textContent = title; $('cbS').textContent = '00:00'; $('callBar').classList.add('on');
+      const buf = await loadBuf(audio);
+      h = buf ? playBuf(buf, { bus: voiceBus }) : null;
+      cues.forEach(([s], i) => timers.push(setTimeout(() => fire(i), s * 1000 * Math.max(F, .3))));
+      const iv = setInterval(() => $('cbS').textContent = mmss((Date.now() - answeredAt) / 1000), 500);
+      const ended = () => { clearInterval(iv); finish(); };
+      $('cbX').onclick = () => { clearInterval(iv); if (h) h.stop(); $('callBar').classList.remove('on'); const quick = Date.now() - answeredAt < 8000; if (quick && attempts < 2){ timers.push(setTimeout(ring, 3000)); } else { cues.forEach((c, i) => fire(i)); finish(); } };
+      if (h) h.ended.then(() => { if ($('callBar').classList.contains('on')) ended(); }); else setTimeout(ended, 4000);
+    };
+    ring();
+  });
+}
+
+/* Ch. 10 — les 22 secondes en binaural */
+async function silenceBinaural(){
+  let st = 'unknown'; try { st = (await navigator.permissions.query({ name: 'microphone' })).state; } catch(e){}
+  if (st !== 'granted'){ await journal('Reconnexion micro interphone · autorisation opérateur requise'); await sleep(1000); }
+  $('silA').textContent = 'TEST DE LIGNE'; $('silB').textContent = 'Ne parle plus. Ne bouge plus.'; showOv('sil');
+  let stream = null; try { stream = await micOpen(); } catch(e){}
+  let fail = false;
+  if (stream){
+    const rec = recorder(stream); rec.start();
+    let base = 0, frames = 0, loud = 0; const t0 = Date.now();
+    while (Date.now() - t0 < 6000){
+      const r = rec.rms(); frames++;
+      if (frames <= 6) base = Math.max(base, r);
+      else { const thr = Math.max(0.035, base * 3.2); if (r > thr){ if (++loud >= 3){ fail = true; break; } } else loud = Math.max(0, loud - 1); }
+      await rawSleep(100);
+    }
+    const x = rec.stop(); rec.close();
+    const n = Math.floor(AC.sampleRate * 2); MEM.ambient = x.length > n ? x.slice(x.length - n) : x;
+  } else await rawSleep(6000);
+  if (fail) return binauralFail();
+  nappe.cut(); $('silA').textContent = ''; $('silB').textContent = '';
+  await rawSleep(1500);
+  $('silB').textContent = 'Ne touche plus à rien.';
+  const buf = await loadBuf('a3'); const h = buf ? playBuf(buf, { gain: 1 }) : null;
+  const res = await new Promise(resolve => {
+    const onT = e => { e.preventDefault(); e.stopPropagation(); clean(); resolve('fail'); };
+    const clean = () => { document.removeEventListener('pointerdown', onT, true); inBinaural = null; clearTimeout(to); };
+    inBinaural = () => { clean(); resolve('fail'); };
+    setTimeout(() => document.addEventListener('pointerdown', onT, true), 200);
+    const to = setTimeout(() => { clean(); resolve('ok'); }, (buf ? buf.duration : 22) * 1000 * Math.max(F, .2));
+  });
+  if (res === 'fail'){ if (h) h.stop(); return binauralFail(); }
+  hideOv('sil');
+  reinject();
+  setTimeout(() => nappe.back(), 2500);
+  return 'ok';
+}
+async function binauralFail(){
+  await play('a3_echec');
+  hideOv('sil'); setTimeout(() => nappe.back(), 6000);
+  return 'fail';
+}
+function reinject(){
+  if (!MEM.ambient || !AC) return;
+  const b = AC.createBuffer(1, MEM.ambient.length, AC.sampleRate); b.getChannelData(0).set(MEM.ambient);
+  const s = AC.createBufferSource(); s.buffer = b; const g = AC.createGain(); g.gain.value = 2.5; s.connect(g);
+  interphone(AC, g, voiceBus, { muffle: 1000, dur: 3 }); s.start();
+}
+
+/* Ch. 11 — Piège 12 : la voix volée */
+async function stolenVoice(){
+  const segs = MEM.segs || [], sr = AC ? AC.sampleRate : 44100;
+  const s1 = segs[0] && voiced(segs[0], sr), s4 = segs[3] && voiced(segs[3], sr);
+  if (s1 && s4){
+    try {
+      const v4 = segs[3].slice(s4.a, s4.b), ouvrir = v4.slice(0, Math.floor(v4.length * 0.42));
+      let a = s1.a, fr = s1.frames, w = s1.w, gap = 0, cut = -1;
+      for (let i = Math.floor(s1.a / w); i < Math.floor(s1.b / w); i++){ if (fr[i] < s1.th){ gap++; if (gap >= 6) cut = i; } else gap = 0; }
+      const pr = cut > 0 ? segs[0].slice(cut * w, s1.b) : segs[0].slice(s1.b - Math.floor((s1.b - s1.a) * 0.35), s1.b);
+      const total = 1.5 + v4.length / sr + 1.5 + pr.length / sr + 1 + ouvrir.length / sr + 0.3;
+      const oc = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, Math.ceil(total * sr), sr);
+      const bus = oc.createGain(); bus.gain.value = 1.6;
+      interphone(oc, bus, oc.destination, { dur: total });
+      const hiss = oc.createBuffer(1, Math.floor(1.5 * sr), sr), hx = hiss.getChannelData(0); let l = 0; for (let i = 0; i < hx.length; i++){ l += 0.1 * ((Math.random()*2-1) - l); hx[i] = l * 0.05; }
+      let t = 0; const put = (arr, at) => { const b = oc.createBuffer(1, arr.length, sr); b.getChannelData(0).set(arr); const s = oc.createBufferSource(); s.buffer = b; s.connect(bus); s.start(at); };
+      const hs = oc.createBufferSource(); hs.buffer = hiss; hs.connect(oc.destination); hs.start(0);
+      t = 1.5; put(v4, t); t += v4.length / sr + 1.5; put(pr, t); t += pr.length / sr + 1; put(ouvrir, t);
+      const out = await new Promise((res, rej) => { oc.oncomplete = e => res(e.renderedBuffer); const p = oc.startRendering(); if (p && p.then) p.then(res, rej); });
+      MEM.v5 = out;
+      r42('Empreinte vocale opérateur diffusée (liaison L-511)');
+      return await leo('', { audio: 'mem:v5', fast: true });
+    } catch(e){ console.warn(e); }
+  }
+  return await leo('', { audio: 'a5_secours', fast: true });
+}
+
+/* Ch. 11 — Piège 7b : confort opérateur */
+function showComfort(){ if (!S.flags.comfort) $('comfort').classList.remove('hide'); }
+function hideComfort(){ $('comfort').classList.add('hide'); }
+$('comfort').onclick = () => {
+  S.flags.comfort = Date.now(); save(); hideComfort();
+  journal('Retour audio L-511 désactivé · Confort opérateur actif.');
+  r42('Retour audio gardien coupé (confort opérateur)');
+  setTimeout(() => { if (!S.ended) journal('Retour audio L-511 coupé depuis 3 min · réglage identique : poste #41'); }, 180000 * F);
+};
+
+/* Fin 3 — 8 s d'impuissance sur CAM 03 */
+async function fin3(){
+  const box = $('caBox'), ctl = $('caCtl');
+  box.querySelectorAll('img').forEach(i => i.remove());
+  const im = imgEl('cam03_sil'); im.className = 'on adv'; box.prepend(im);
+  $('caL').textContent = 'CAM 03 · SS-B';
+  ctl.innerHTML = '<button class="ko" id="caLock">VERROUILLER S.14</button>';
+  showOv('camAct');
+  requestAnimationFrame(() => requestAnimationFrame(() => { im.style.transform = 'scale(1.7) translateY(4%)'; }));
+  $('caLock').onclick = () => { const b = $('caLock'); b.textContent = 'ACCÈS REFUSÉ'; sfx.ko(); setTimeout(() => { if (b.isConnected) b.textContent = 'VERROUILLER S.14'; }, 650); };
+  await rawSleep(8000);
+  if (!S.flags.comfort) await Promise.race([play('fin3_echec', { bus: voiceBus }), rawSleep(4500)]);
+  setImg($('jsImg'), 'cam03_obj'); showOv('js'); play('fin3_choc');
+  await rawSleep(750);
+  stopAll(); nappe.stop(); hideOv('camAct');
+  showOv('black'); hideOv('js');
+  await rawSleep(3000);
+  showOv('notif'); await rawSleep(5000);
+  hideOv('notif');
+}
+
+/* Fins : écrans sobres, noir, relevé */
+async function soberEnd(text, ms){ $('soberP').textContent = text; showOv('sober'); await rawSleep(ms * Math.max(F, .3)); }
+async function camZeroLine(){ nappe.stop(); $('soberP').textContent = 'CAM 00 — flux toujours ouvert.'; showOv('sober'); await rawSleep(1200); play('fin1_pas'); await rawSleep(3500); hideOv('sober'); }
+async function blackout(ms){ showOv('black'); await rawSleep(ms * Math.max(F, .3)); }
+function closeShift(id, full){
+  S.ended = id; S.endedAt = Date.now(); S.chronoEnd = 0;
+  if (!S.docs.includes('r42')) S.docs.push('r42');
+  save(); nappe.stop(); renderDocs(); cutChat(); setLeo({ status: S.leo.avatar === 'none' ? '' : 'hors ligne' });
+  if (full){ showRel(true); hideOv('black'); }
+  else { hideOv('black'); hideOv('sober'); badge('docs', 1); }
+}
+
+/* =========================================================
+   DÉROULÉ, REPRISE, RÉINITIALISATION
    ========================================================= */
 async function run(){
+  running = true;
   try {
     for (; S.chapter < CHAPTERS.length; S.chapter++){
-      S.cp = { logLen: S.log.length, docs: S.docs.slice(), cams: Object.assign({}, S.cams), flags: Object.assign({}, S.flags), leo: Object.assign({}, S.leo) };
+      S.cp = { logLen: S.log.length, docs: S.docs.slice(), cams: JSON.parse(JSON.stringify(S.cams)), flags: Object.assign({}, S.flags), leo: Object.assign({}, S.leo), wounds: S.wounds, r42: S.r42.length, seq: S.seq };
       save();
+      if (S.chapter > 0) nappe.start();
       await CHAPTERS[S.chapter]();
     }
   } catch (e){
-    if (!(e instanceof GameOver)) { console.error(e); return; }
-    KP = null; hideOv('kp'); $('kpBtn').classList.add('hide'); document.querySelectorAll('.choices').forEach(c=>c.remove());
+    if (!(e instanceof GameOver)){ console.error(e); return; }
+    KP = null; hideOv('kp'); hideOv('camAct'); $('kpBtn').classList.add('hide'); document.querySelectorAll('.choices').forEach(c => c.remove()); sab = null;
     S.chapter = CHAPTERS.length; save();
-    try { await ENDINGS[e.id].run(); } catch(x){}
-    await new Promise(r => setTimeout(r, 6000 * F));
-    showEnd(e.id);
+    try { await ENDINGS[e.id](); } catch(x){ console.error(x); closeShift(e.id, e.id === 'piege' || e.id === 'silence'); }
   }
 }
-
-/* menu caché : 5 touches sur le logo */
+async function resume(){
+  audioInit(); unlockMedia(); keepAwake();
+  if (S.cp){ S.log = S.log.slice(0, S.cp.logLen); S.docs = S.cp.docs.slice(); S.cams = S.cp.cams; S.flags = Object.assign({}, S.cp.flags); S.leo = Object.assign({}, S.cp.leo); S.wounds = S.cp.wounds; S.r42 = S.r42.slice(0, S.cp.r42); S.seq = S.cp.seq; }
+  S.flags.nappeCut = 0; save();
+  openApp(); run();
+}
 let taps = 0, tapT = null;
-$('logoTap').addEventListener('click', () => { taps++; clearTimeout(tapT); tapT = setTimeout(()=>taps=0, 1500); if (taps >= 5 && confirm('Recommencer la partie depuis le début ?')) restart(); });
+function tapReset(){ taps++; clearTimeout(tapT); tapT = setTimeout(() => taps = 0, 1500); if (taps >= 5){ taps = 0; if (confirm('Réinitialiser le poste #42 et effacer la mémoire de fin de partie ?')){ try { localStorage.removeItem(KEY); } catch(e){} location.href = location.pathname + location.search; } } }
+$('logoTap').addEventListener('click', tapReset);
+$('pVeille').addEventListener('click', tapReset);
 
 /* démarrage */
-noiseLoop($('c0n'));
-if (S.ended){ go('s-warn'); try { localStorage.removeItem(KEY); } catch(e){} S = blank(); }
-else if (S.started) go('s-resume');
-else go('s-warn');
+noiseLoop($('cvN')); noiseLoop($('caN'));
+portal();
 </script>
 </body>
 </html>

@@ -1,334 +1,512 @@
 /* =====================================================================
-   LA RELÈVE — histoire de l'appli automatique « VEILLE »
-   Le joueur est l'opérateur·rice de télésurveillance de nuit.
-   Jetons : {P} prénom · {,P} « , prénom » · {e} accord (e / rien / ·e)
-   Toutes les fonctions (leo, ask, keypad…) sont définies dans index.html.
+   LA RELÈVE — histoire v2.5 de l'appli « VEILLE »
+   Le joueur est l'opérateur·rice #42. Léo (L-511) est le gardien du Sous-Sol B.
+   Jetons : {P} prénom · {,P} « , prénom » · {e} accord (e / rien)
+   Toutes les fonctions (leo, faux, journal, keypad…) sont définies dans index.html.
    ===================================================================== */
 
-const DOCS = {
-  registre:    { title: "Journal des badges — SS-B",        src: "medias/02_registre.jpg" },
-  plan:        { title: "Plan d'évacuation — SS-B",          src: "medias/04_plan.jpg" },
-  supervision: { title: "Journal de supervision technique",  src: "medias/05_supervision.jpg" },
-  gestion:     { title: "Capture — téléphone de Léo",        src: "medias/06_gestion_appareil.jpg" },
-  radiation:   { title: "Lettre trouvée par terre",          src: "medias/07_radiation.jpg" },
-  sang:        { title: "Photo — grille S.14",               src: "medias/16_sang_porte.jpg" },
-  postit:      { title: "Post-it — grille S.14",             src: "medias/09_postit_grille.jpg" },
-  etiquette:   { title: "Étiquette — cadenas du quai",       src: "medias/10_etiquette_quai.jpg" },
+/* ---------------------------------------------------------------------
+   MÉDIAS : pour chaque clé, le jeu essaie les fichiers dans l'ordre.
+   1er = fichier FINAL (nom du kit de production, à déposer dans medias/)
+   suivants = PROVISOIRES (générés par gen/provisoires.py ou vocaux v1).
+   --------------------------------------------------------------------- */
+const MEDIA = {
+  // Photos de Léo (couleur, verticales, flash)
+  couloir:      ['medias/couloir_ch2.jpg', 'medias/01_couloir.jpg'],
+  registre:     ['medias/02_registre.jpg'],
+  plan:         ['medias/plan_ssb.jpg', 'medias/04_plan.jpg'],
+  vitre_sil:    ['medias/vitre_silhouette.jpg', 'medias/provisoire/vitre_silhouette.jpg'],
+  vitre_vide:   ['medias/vitre_vide.jpg', 'medias/provisoire/vitre_vide.jpg'],
+  gestion:      ['medias/gestion_maint104.jpg'],
+  trainee:      ['medias/trainee_sang_vasseur.jpg', 'medias/provisoire/trainee_sang_vasseur.jpg'],
+  sang_grille:  ['medias/sang_grille_s14.jpg', 'medias/16_sang_porte.jpg'],
+  postit:       ['medias/postit_1432.jpg', 'medias/provisoire/postit_1432.jpg'],
+  cadenas:      ['medias/cadenas_km.jpg', 'medias/provisoire/cadenas_km.jpg'],
+  // Documents
+  radiation:    ['medias/radiation_annotee.jpg'],
+  note_r9:      ['medias/note_r9.jpg', 'medias/provisoire/note_r9.jpg'],
+  supervision:  ['medias/supervision_maint104.jpg'],
+  // Flux caméras (N&B, vue plongeante, sans texte incrusté)
+  cam01_vide:   ['medias/cam01_couloir_vide.jpg', 'medias/provisoire/cam01_couloir_vide.jpg'],
+  cam01_sil:    ['medias/cam01_couloir_silhouette.jpg', 'medias/provisoire/cam01_couloir_silhouette.jpg'],
+  cam02_vide:   ['medias/cam02_service_vide.jpg', 'medias/provisoire/cam02_service_vide.jpg'],
+  cam02_sil:    ['medias/cam02_service_silhouette.jpg', 'medias/provisoire/cam02_service_silhouette.jpg'],
+  cam03_vide:   ['medias/cam03_grille_vide.jpg', 'medias/provisoire/cam03_grille_vide.jpg'],
+  cam03_sil:    ['medias/cam03_grille_s14.jpg', 'medias/provisoire/cam03_grille_s14.jpg'],
+  cam03_obj:    ['medias/cam03_objectif.jpg', 'medias/provisoire/cam03_objectif.jpg'],
+  // Sons
+  nappe:        ['medias/nappe_ssb.m4a', 'medias/nappe_ssb.wav'],          // absente : nappe synthétisée par le code
+  a0:           ['medias/audio0_leo_ancrage.mp3', 'medias/provisoire/audio0_leo_ancrage.mp3'],
+  a1:           ['medias/audio1_vasseur_1940.mp3', 'medias/provisoire/audio1_vasseur_1940.mp3'],
+  a2:           ['medias/audio2_appel_faux_leo.mp3', 'medias/provisoire/audio2_appel_faux_leo.mp3'],
+  a3:           ['medias/audio3_binaural_22s.mp3', 'medias/provisoire/audio3_binaural_22s.mp3'],
+  a3_echec:     ['medias/audio3_echec.mp3', 'medias/provisoire/audio3_echec.mp3'],
+  a4_poignee:   ['medias/audio4_poignee.mp3', 'medias/provisoire/audio4_poignee.mp3'],
+  a4_parquet:   ['medias/audio4_parquet.mp3', 'medias/provisoire/audio4_parquet.mp3'],
+  a5_secours:   ['medias/audio5_secours.mp3', 'medias/provisoire/audio5_secours.mp3'],
+  fin4_souffle: ['medias/audio_fin4_souffle.mp3', 'medias/provisoire/audio_fin4_souffle.mp3'],
+  ch4_coups:    ['medias/ch4_coups.mp3', 'medias/provisoire/ch4_coups.mp3'],
+  ch7_vocal:    ['medias/ch7_vocal_inaudible.mp3', 'medias/provisoire/ch7_vocal_inaudible.mp3'],
+  ch7_coup:     ['medias/ch7_coup_sec.mp3', 'medias/provisoire/ch7_coup_sec.mp3'],
+  ch7_obtu:     ['medias/ch7_obturateur.mp3', 'medias/provisoire/ch7_obturateur.mp3'],
+  fin3_echec:   ['medias/fin3_echec.mp3', 'medias/provisoire/fin3_echec.mp3'],
+  fin3_choc:    ['medias/fin3_choc.mp3', 'medias/provisoire/fin3_choc.mp3'],
+  fin1_pas:     ['medias/fin1_pas_droite.mp3', 'medias/provisoire/fin1_pas_droite.mp3'],
 };
 
-const CAMS = [
-  { id: 'c1', label: 'CAM 01 · COULOIR PRINCIPAL', src: 'medias/01_couloir.jpg' },
-  { id: 'c2', label: 'CAM 02 · COULOIR DE SERVICE', src: 'medias/cam_service.jpg' },
-  { id: 'c3', label: 'CAM 03 · ISSUE EST (S.14)',   src: 'medias/cam_s14.jpg' },
-  { id: 'c4', label: 'CAM 04 · LOCAL TECHNIQUE',    src: 'medias/cam_service.jpg' },
+const DOCS = {
+  badges:      { title: 'Journal des badges — SS-B',             type: 'badges' },
+  plan:        { title: "Plan d'évacuation — SS-B",              img: 'plan' },
+  a1:          { title: 'Archive interphone · SS-B · 19:40',      type: 'audio', audio: 'a1' },
+  gestion:     { title: 'Capture — téléphone de service L-511',  img: 'gestion' },
+  radiation:   { title: 'Notification de radiation · J-732',     img: 'radiation' },
+  note:        { title: 'Note de procédure · Réserve R-9',       img: 'note_r9' },
+  supervision: { title: 'Journal de supervision technique',      img: 'supervision' },
+  r41:         { title: 'Relevé de session — poste #41',         type: 'r41' },
+  r42:         { title: 'Relevé de session — poste #42',         type: 'r42' },
+};
+
+/* Journal des badges (affiché sur le poste de l'opérateur) */
+const BADGES = [
+  ['DELACROIX Marc', 'M-408', '08:12', '17:05', 'CHEF SITE'],
+  ['BENALI Sophie',  'S-219', '08:45', '17:30', 'ACTIF'],
+  ['MANSOUR Karim',  'K-104', '09:00', '18:15', 'MAINT.'],
+  ['VASSEUR Julien', 'J-732', '19:42', '--:--', 'RADIÉ*'],
+  ['MOREAU Léo',     'L-511', '19:50', '--:--', 'GARDE NUIT'],
 ];
 
-const OUI = /\b(oui|ouais|yes|y a|ya|quelqu|silhouette|ombre|homme|mec|type|personne au fond|au fond|yeux|forme|vu|vois)\b/;
+/* Relevé #41 (nuit de la rotation 2024-08) */
+const R41 = [
+  ['23:14:02', 'Connexion validée. Clauses PTI-N signées.'],
+  ['23:29:44', 'Commande S.12 (408#) – OUVERT (verrou R-9 libéré)'],
+  ['23:36:18', 'Absence opérateur détectée (00:11)'],
+  ['23:41:05', 'Contrôle CAM 00 : portrait enregistré'],
+  ['23:51:12', 'Retour audio gardien coupé (confort opérateur)'],
+  ['23:54:30', 'Signal gardien SS-B : perte de liaison'],
+  ['23:57:49', 'Micro opérateur : bruit de poignée détecté'],
+  ['23:58:03', 'Déconnexion anormale.'],
+  ['23:58:04', 'POSTE VACANT. Flux CAM 00 maintenu ouvert.[!]', 'orange'],
+];
+const R41_LAST = "En attente de l'opérateur #42.";
 
+const CAMS = [
+  { id: 'c0', label: 'CAM 00 · POSTE OPÉRATEUR' },
+  { id: 'c1', label: 'CAM 01 · COULOIR PRINCIPAL', src: 'cam01_vide' },
+  { id: 'c2', label: 'CAM 02 · COULOIR DE SERVICE', src: 'cam02_vide' },
+  { id: 'c3', label: 'CAM 03 · GRILLE S.14',        src: 'cam03_vide' },
+];
+
+/* Hors créneau et persistance (portail) */
+const PORTAIL = {
+  horsCreneau: 'Aucune relève disponible. Prochaine prise de poste : 22:00.',
+  statut: {
+    verite:  () => 'Poste #42 · fin de garde enregistrée · statut : reconduit · prochaine garde : ce soir 23:00',
+    bouc:    () => 'Poste #42 · clôturé · prime de discrétion versée',
+    piege:   () => `Poste #42 · vacant · Poste #43 · candidature reçue · ${hms()}`,
+    silence: () => `Poste #42 · vacant · Poste #43 · candidature reçue · ${hms()}`,
+  },
+};
+
+/* =====================================================================
+   CHAPITRES (Ch. 0 = portail, géré par le moteur)
+   ===================================================================== */
 const CHAPTERS = [
 
-  /* 1 — Prise de poste */
+  /* Ch. 1 — Prise de poste (0–3 min) */
   async () => {
-    await sys("Connexion au site ARCHIVES NORD — sous-sol B… OK");
-    await sys("Gardien en poste : MOREAU Léo · badge L-511");
+    nappe.start();
     await sleep(5000);
-    camLost('c4'); await sys("⚠ CAM 04 · LOCAL TECHNIQUE — signal perdu");
-    await sleep(3500);
-    camLost('c1'); camLost('c2'); await sys("⚠ CAM 01, CAM 02 — signal perdu");
-    await sleep(2500);
-    await leo("Salut ! C'est toi qui prends le poste ce soir ? Moi c'est Léo, le gardien de nuit 👋");
-    await leo("Les caméras du sous-sol B viennent de couper. Tu les vois de ton côté ?");
-    await reply(70000);
-    await leo("Ouais chez moi aussi c'est noir. Et le badge du SS-B répond plus.");
-    await leo("Je descends voir. Reste en ligne stp, j'ai qu'une barre de réseau en bas.");
+    await leo("salut ?");
+    await leo("ah nickel ya quelqun au poste ce soir");
+    await leo("léo, garde de nuit ss-b. jai cru que jallais encore faire la ronde tout seul comme mardi");
+    await reply(60000);
+    await leo("enchanté {P}");
+    await leo("par contre je te préviens leur café du distributeur a un goût de liquide vaisselle et il fait genre 12 degrés en bas");
+    await leo("ma copine inès finit sa garde aux urgences à 6h jlui ai promis les croissants donc faut que je tienne");
+    await leo("ils tont prévenu que cam 02 saute toutes les dix minutes ? karim devait passer voir ça avant de partir mais bon");
+    await reply(30000);
+    await sleep(4000);
+    camSet('c1', { off: true }); camSet('c2', { off: true });
+    await journal('CAM 01 · CAM 02 · signal perdu');
+    await sleep(3000);
+    await leo("ok bon bah super");
+    await leo("tu les as encore toi ou tout est passé au noir ?");
+    await reply(60000);
+    await leo('', { audio: 'a0' });
+    await sleep(14000);
   },
 
-  /* 2 — Le couloir */
+  /* Ch. 2 — Le couloir (3–6 min) · Piège 2 activé */
   async () => {
-    await sleep(22000);
-    await ghostTyping(5000);
-    await sleep(6000);
-    await leo("Mon écran est fissuré, j'y vois rien dans le noir. La porte au fond du couloir, elle est ouverte ou c'est moi ?", { img: 'medias/01_couloir.jpg' });
+    S.flags.p2 = true; save();
+    await sleep(14000);
+    await leo("jsuis au sous sol b");
+    await leo("ça pue lhumidité ici cest fou, on dirait un parking abandonné");
+    await leo("attends deux secondes");
+    await sleep(4000);
+    await leo('', { img: 'couloir' });
+    await leo("dis moi que jhallucine");
+    await leo("la porte tout au fond elle est ouverte là non ?");
+    await leo("je te jure que je lai tirée à 20h en prenant ma garde, jai même entendu le loquet claquer");
     await reply(75000);
-    await leo("Je l'avais fermée à ma ronde de 20h. J'aime pas ça.");
+    await leo("ya pas de fenêtre ici on est deux étages sous terre");
+    await leo("bon ok jme fais des films cest sûrement quelqun de laprem qui a mal claqué le battant");
+    await leo("laisse moi deux minutes je vais jeter un œil au poste de garde voir qui a badgé ce soir, histoire de pas déclencher une alerte pour rien sur ma période dessai");
   },
 
-  /* 3 — Le journal des badges (énigme 1) */
+  /* Ch. 3 — Journal des badges (É1) · Piège 13 */
   async () => {
-    await leo("Toi t'as le journal des badges sur ton poste. Tu peux regarder s'il y a encore quelqu'un dans le bâtiment à part moi ?");
-    await addDoc('registre');
+    await sleep(9000);
+    for (let i = 0; i < 3; i++){ await ghostTyping(2600); await sleep(4000); }
+    await sleep(6000);
+    await leo("bon jsuis au poste de garde");
+    await leo('', { img: 'registre' });
+    await leo("cest le journal des badges de ce soir. toi tu las aussi sur ton poste normalement");
+    await addDoc('badges');
+    S.flags.obsBadges = true; save();
+    await leo("ya encore quelqun dans le bâtiment à part moi ?");
     await ask({
       ok: [/vasseur|julien|j\s?-?\s?732|\b732\b/],
       hints: [
-        "Regarde la colonne SORTIE, y en a qui sont jamais repartis ?",
-        "Moi c'est L-511, arrivé à 19h50. Y a quelqu'un d'autre sans heure de sortie ?",
-        "Vasseur… c'est pas le nom qu'on m'a dit de jamais laisser entrer ?",
+        "regarde la colonne sortie, ya des gens qui sont jamais repartis ?",
+        "moi cest l-511, arrivé à 19h50. ya quelquun dautre sans heure de sortie ?",
+        "attends… vasseur. cest pas le nom quils mont dit de jamais laisser entrer ?",
       ],
     });
-    await leo("Vasseur ?? C'est le gars qui s'est fait virer en septembre…");
-    await leo("Comment il a pu passer avec un badge désactivé ?");
+    S.flags.obsBadges = false; save();
+    await leo("vasseur ??");
+    await leo("cest larchiviste qui sest fait virer en septembre");
+    await leo("radié le 12/09 cest écrit. comment il a pu badger à 19h42 avec un badge désactivé");
   },
 
-  /* 4 — Les bruits, la photo par la vitre */
+  /* Ch. 4 — Les bruits & archive 19h40 · Pièges 6a, 9, 13 */
   async () => {
-    await sleep(4000);
-    await leo("", { audio: 'medias/03_vocal_bruits.mp3', typingLabel: 'enregistre un audio…' });
-    await sleep(45000);
-    await ghostTyping(7000);
-    await sleep(15000);
-    await leo("Il est juste devant le local technique. Je me suis enfermé dedans.");
+    await sleep(6000);
+    await leo("tas lheure toi ? ma montre sest arretée sur 19:40 jsais meme pas quand");
+    await leo("bref");
     await sleep(9000);
-    await leo("J'ai pris une photo par la vitre pour voir s'il est parti. Moi je vois rien. Toi tu vois quelqu'un ?", { img: 'medias/11_photo_silhouette.jpg' });
+    nappe.cut();
+    await leo('', { audio: 'ch4_coups', typingLabel: 'enregistre un audio…' });
+    await sleep(20000);
+    await leo('', { img: 'vitre_sil', pair: 'vitre_vide' });
+    await leo("tu vois quelquun toi ?");
+    readMode('hold');
     const r = await reply(90000);
-    if (r && OUI.test(norm(r))) await leo("Quoi ? Où ça ?");
-    else await leo("Attends… au fond. Dans l'encadrement de la porte.");
-    await sleep(3000);
-    await burst(["Y avait personne quand je l'ai prise.", "Je te jure.", "Y AVAIT PERSONNE."], 1600);
+    if (r){ markRead(); await sleep(40000); }
+    readMode('auto');
+    await leo("pardon jai pas osé bouger");
+    await leo("jtenais le tel contre moi pour pas que lécran éclaire");
+    await sleep(5000);
+    await journal('Archive interphone · SS-B · 19:40 · restaurée');
+    await addDoc('a1', true);
+    nappe.back();
+    await sleep(25000);
+  },
+
+  /* Ch. 5 — Le digicode et la première fêlure (É2 + Caméra active #1) */
+  async () => {
+    await leo("il est parti je crois. jentends plus rien");
+    await leo("jai le plan dévacuation au mur devant moi");
+    await leo('', { img: 'plan' });
+    await addDoc('plan', true);
+    await leo("ya une porte arrière dans le local, sur le couloir de service. avec un digicode");
+    await leo("toi tu peux louvrir à distance depuis ton poste non ? le code doit être noté quelque part sur le journal des badges");
+    await keypad({
+      title: 'PORTE S.12 · ARRIÈRE', sub: 'Commande à distance · opérateur #42',
+      code: ['408#', '408'],
+      hints: [
+        "ya une note sécurité en bas du journal des badges non ?",
+        "ça parle du chef de site. il est dans la liste ?",
+        "son badge cest m-quelque chose. juste les 3 chiffres puis #",
+      ],
+    });
+    r42('Commande S.12 (408#) – OUVERT (verrou R-9 libéré)');
+    await journal('Porte S.12 · ouverture à distance · opérateur #42');
+    await leo("ça a marché");
+    await leo("ok jsuis dans le couloir de service");
+    await leo("cam 02 elle saute mais toi tu peux la forcer non ? dis moi quand cest dégagé et jtraverse");
+    const ok = await traversal();
+    if (ok){
+      await leo("jy vais", { fast: true });
+      await sleep(3000);
+    } else {
+      S.wounds++; save();
+      await burst(["putain", "il etait là", "il ma eu au bras jsais pas avec quoi", "jsuis passé mais ça saigne"], 1800);
+    }
+    await sleep(27000);
+    await faux("Je suis passé dans le couloir de service. Tout va bien.");
+    await sleep(10000);
+    await leo("putain jai cru quil etait juste derriere moi", { fast: true });
+    await leo("mon cœur tape à 200 là attends jreprends mon souffle");
+  },
+
+  /* Ch. 6 — MAINT-104 et l'écran observé (É3) · Pièges 3, 4, 7a */
+  async () => {
+    S.flags.p3 = true; save();
+    await sleep(6000);
+    await leo("attends faut que je te dise un truc", { fast: true });
+    await sleep(3500);
+    deleteLast(); microGlitch();
+    await sleep(6000);
+    await leo("jai rien supprimé moi");
+    await leo("mon tel fait nimporte quoi depuis tout à lheure");
+    await leo("jai été voir dans les réglages du tel de service, regarde");
+    await leo('', { img: 'gestion' });
+    await addDoc('gestion', true);
+    await leo("maint-104 cest quoi ce truc ? quelquun a la main sur mon tel là");
+    await ask({
+      ok: [/karim|mansour|k\s?-?\s?104|\b104\b|maint/],
+      hints: [
+        "104… jai déjà vu ce numéro ce soir. sur les badges ?",
+        "maint cest la maintenance non ? qui sen occupe ici ?",
+        "k-104… cest pas karim ça ?",
+      ],
+    });
+    await leo("karim ??");
+    await leo("nan attends tu rigoles il ma encore filé un double de badge ce matin en rigolant");
+    await leo("pourquoi il prendrait la main sur mon tel de service à cette heure là…");
+    const p3 = await waitFor(() => S.flags.p3first, 40000);
+    await sleep(p3 ? 20000 : 3000);
+    await faux("Ce n'est pas grave. Continue comme ça, tu fais très bien ton travail, {P}.");
+    await sleep(12000);
+    await camReconnect();               // pastille verte : caméra frontale réactivée en silence
     await sleep(20000);
   },
 
-  /* 5 — Le digicode (énigme 2) */
+  /* Ch. 7 — Noir absolu & CAM 00 (Jump scare #1) · Pièges 4, 5, 9 */
   async () => {
-    await leo("J'ai décroché le plan au mur. Il bloque le couloir principal.", { img: 'medias/04_plan.jpg' });
-    await addDoc('plan', true);
-    await leo("Y a une porte derrière moi, sur le couloir de service, avec un digicode. Toi tu peux l'ouvrir à distance depuis ton poste !");
-    await leo("Le code doit être noté quelque part sur le journal des badges.");
-    await keypad({
-      title: 'PORTE S.12 · ARRIÈRE', sub: 'Ouverture à distance',
-      code: ['408', '408#'],
-      hints: [
-        "Y a une note de sécurité en bas du journal des badges, non ?",
-        "Ça parle du chef de site. Il est dans la liste ?",
-        "Son badge c'est M-quelque chose. Juste les 3 chiffres, puis #.",
-      ],
-    });
-    await sys("🔓 PORTE S.12 (arrière) — ouverture à distance — opérateur : {P}");
-    await leo("Ça a marché !! Je passe dans le couloir de service.");
-    await leo("Je coupe le son, je te tiens au courant.");
-    await addDoc('supervision');
-    await sleep(25000);
-    await intrus("Merci pour le code, {P}.");
+    await leo("chut", { fast: true });
+    const v = await leo('', { audio: 'ch7_vocal', typingLabel: 'enregistre un audio…', onPlay: () => nappe.cut() });
+    await voiceDone(v, 30000);
+    nappe.cut();
+    await sleep(600);
+    await play('ch7_coup');
+    const shot = await darkCapture();
+    r42('Contrôle CAM 00 : portrait enregistré');
+    archivePortrait(shot, `Archive R-9 · portrait opérateur #42 · ${hms()} · ${S.local} · porte : ${S.porte} (déclaré)`);
+    setLeo({ avatar: null });
     await sleep(15000);
+    nappe.back();
+    camSet('c1', { off: false });
+    S.flags.periph = true; save();
+    await sleep(6000);
   },
 
-  /* 6 — Paranoïa (énigme 3) */
+  /* Ch. 8 — Le corps, la R-9 et le bruit domestique (É4) · Pièges 14, 8a */
   async () => {
-    await leo("Ne l'écoute pas. Il te ment depuis le début.", { fast: true });
-    await sleep(4000);
-    deleteLast(); glitch(900);
-    await reply(60000);
-    await leo("Quoi ?? J'ai rien supprimé moi ! Mon tel fait n'importe quoi, des messages partent tout seuls.");
-    await sleep(6000);
-    await leo("J'ai fouillé dans les réglages, y a ce truc. C'est le tel du boulot.", { img: 'medias/06_gestion_appareil.jpg' });
-    await addDoc('gestion', true);
-    await leo("ADM-408… ça te dit quelque chose ?");
-    await ask({
-      ok: [/delacroix|marc|chef|408|m\s?-?\s?408|directeur|patron/],
-      hints: [
-        "408, j'ai déjà vu ce numéro ce soir non ?",
-        "C'est pas le code de la porte de tout à l'heure ?",
-        "Le matricule du chef de site, c'était quoi déjà ?",
-      ],
-    });
-    await leo("Le chef de site ?? Mais il est parti à 17h05, c'est marqué sur le journal…");
     await sleep(8000);
-    camBack('c2', 'medias/11_photo_silhouette.jpg');
-    await sys("CAM 02 · COULOIR DE SERVICE — signal rétabli");
-    await sleep(7000);
-    camLost('c2');
-    await sleep(10000);
-  },
-
-  /* 7 — Le vocal, la caméra 0 */
-  async () => {
-    await leo("Écoute…", { fast: true });
-    await leo("", { audio: 'medias/13_vocal_ecoute.mp3', typingLabel: 'enregistre un audio…' });
-    await sleep(40000);
-    await sys("⚠ CAM 00 · POSTE OPÉRATEUR — connexion entrante");
-    await sleep(1200);
-    await cam0("JE TE VOIS, {P}.");
-    await sleep(4000);
-    await intrus("Tu es sûr{e} d'aider la bonne personne ?");
+    await leo("jvais voir au fond vers le broyeur");
     await sleep(5000);
-    setLeo({ avatar: 'medias/15_profil_noir.jpg', status: 'il est encore là' });
-    await sys("Léo a modifié sa photo de profil.");
-    await sleep(15000);
-  },
-
-  /* 8 — La lettre (énigme 4) */
-  async () => {
-    setLeo({ status: 'en ligne' });
-    await leo("J'ai rien touché à mon profil. Je te jure.");
-    await sleep(5000);
-    await leo("Y a des feuilles partout devant la salle de tri. Ça sent le cramé, le broyeur tourne tout seul. Regarde, c'était dans le tas.", { img: 'medias/07_radiation.jpg' });
-    await addDoc('radiation', true);
-    await leo("Vasseur s'est fait virer pour ça ??");
-    await sleep(6000);
-    await leo("Attends. Y a un truc sous les feuilles.", { fast: true });
-    await ghostTyping(6000);
-    await sleep(5000);
-    await leo("C'est une main.");
-    await burst(["Y a du sang partout.", "C'est Vasseur. Il a encore son badge autour du cou.", "Il a la gorge ouverte. Il bouge plus.", "putain putain putain"], 2200);
+    await fakeCrash([
+      { text: "tétais où ??" },
+      { text: "{P} jai trouvé quelque chose" },
+      { img: 'trainee' },
+      { text: "ça part du broyeur" },
+      { text: "cest lui. cest vasseur" },
+    ]);
     await sleep(9000);
-    await leo("Il est mort depuis des heures, il est froid. Alors QUI se balade avec son badge depuis 19h42 ?? Comment son badge désactivé a pu marcher ?");
-    await ask({
-      ok: [/reactiv|r[ée]-?activ|adm|408|delacroix|chef|supervision/],
-      hints: [
-        "T'as un journal de supervision sur ton poste, non ? Regarde entre 19h30 et 19h45.",
-        "Le badge de Vasseur était désactivé… quelqu'un l'a réactivé ?",
-        "19h38, réactivation manuelle… par quel opérateur ?",
+    await leo("ya des feuilles partout par terre devant le broyeur. jte prends en photo tout ce qui est lisible");
+    await addDoc('radiation');
+    await addDoc('note');
+    await addDoc('supervision');
+    await leo("lis ça stp moi jy arrive pas jai les mains qui tremblent");
+    await sleep(3000);
+    await journal('Relevé #41 · versé au dossier opérateur #42');
+    await addDoc('r41', true);
+    S.flags.obsR41 = true; save();
+    let done = await waitFor(() => S.flags.p8done, 120000);
+    if (!done){ await journal('Relevé #41 · consultation requise · opérateur #42'); done = await waitFor(() => S.flags.p8done, 60000); }
+    if (done) await sleep(12000);
+    S.flags.obsR41 = false; save();
+  },
+
+  /* Ch. 9 — Sabotage et appel impossible · Piège 7a */
+  async () => {
+    await leo("{P} tas lu ? dis moi cest qui");
+    await sabotage("C'est bon, le couloir est calme maintenant. Avance vers la salle 14.", 90000);
+    await sleep(1800);
+    await leo("attends quoi ?? pk tu me dis daller en 14", { fast: true });
+    await sleep(2500);
+    await fakeCall({
+      title: 'LÉO · Interphone', audio: 'a2',
+      cues: [
+        [8,  () => leo("cest pas moi qui tappelle raccroche !!", { fast: true })],
+        [20, () => leo("RACCROCHE IL EST JUSTE DERRIERE LA VITRE", { fast: true })],
       ],
     });
-    await leo("Donc Delacroix a réactivé le badge d'un mort pour faire croire que c'était lui… et il a coupé les caméras.");
-    await reply(45000);
-    await leo("Je sais plus qui croire.");
+    await sleep(5000);
+    await leo("jsais plus qui croire");
+    await sleep(8000);
   },
 
-  /* 9 — L'appel */
+  /* Ch. 10 — Les 22 secondes en binaural (Jump scare #2 si raté) */
   async () => {
-    await sleep(12000);
-    const r = await fakeCall({ title: 'LÉO · Interphone', audio: 'medias/14_appel_souffle.mp3' });
+    await leo("il revient", { fast: true });
+    await leo("ton micro dinterphone il est ouvert de mon côté");
+    await leo("sil entend quoi que ce soit il saura où je suis");
     await sleep(2500);
-    if (r === 'answered') await leo("Pardon. Je pouvais pas parler. Il était juste derrière la porte.");
-    else await leo("Décroche quand j'appelle stp… Il était juste derrière la porte.");
-  },
-
-  /* 10 — Le silence (micro) */
-  async () => {
-    await sleep(6000);
-    await leo("Il revient.", { fast: true });
-    await leo("Ton micro d'interphone est ouvert de mon côté. S'il entend quoi que ce soit, il saura où je suis.");
-    await leo("Ne fais AUCUN bruit.");
-    const res = await silenceTest(22);
-    if (res === 'heard') {
-      S.flags.heard = true; save();
-      await leo("IL T'A ENTENDU.", { fast: true });
-      await leo("Il a cassé la vitre de la porte. Il a passé le bras, il m'a eu à l'épaule avec un truc coupant.");
-      await leo("Ça saigne beaucoup. Je cours.");
+    const res = await silenceBinaural();
+    r42('Silence requis : ' + (res === 'ok' ? 'respecté' : 'rompu'));
+    S.flags.periph = false;
+    if (res !== 'ok'){
+      S.wounds++; S.flags.silFail = true; save();
+      await sleep(2500);
+      await burst(["IL A CASSÉ LA VITRE", "il ma eu", "jcours"], 1400);
     } else {
-      await leo("…il s'éloigne. J'ai cru que mon cœur allait lâcher.");
+      save();
+      await sleep(3000);
+      await leo("il sest éloigné");
+      await leo("jai cru que mon cœur allait lâcher");
     }
   },
 
-  /* 11 — La sortie (énigme 5) : chrono final */
+  /* Ch. 11 — La sortie (É5 + Caméra active #2) · Pièges 7b, 12 */
   async () => {
-    await sleep(4000);
-    if (!S.flags.heard){ await leo("Il m'a eu. Je sais pas d'où il est sorti, au bras, avec un cutter je crois."); await leo("Ça arrête pas de saigner, je mets la main dessus."); }
-    await leo("J'ai deux sorties : la grille de l'issue Est (salle 14) ou le quai de livraison (salle 3). Il revient. JE VAIS OÙ ?", { video: 'medias/08_video_couloir.mp4' });
-    startChrono(S.flags.heard ? 240 : 300);
-    const v = await choice([
-      { label: '🚪 Salle 14 — la grille', value: 'G', match: /\b14\b|grille|est\b/ },
-      { label: '📦 Salle 3 — le quai',   value: 'Q', match: /\b3\b|quai|livraison|roulante/ },
-    ], { idle: 50000, hint: "Regarde la légende en bas du plan, VITE ! Qui peut contrôler la grille ?" });
-    S.flags.route = v; save();
+    await sleep(3000);
+    await leo("faut que je sorte dici");
+    await leo("sur le plan ya deux sorties. la grille de la salle 14 ou le quai, salle 3");
+    startChrono(S.flags.silFail ? 240 : 300);
+    showComfort();
+    camSet('c3', { src: 'cam03_sil' }); S.flags.cam03 = 1; save();
+    await sleep(6000);
+    await faux("Le quai est bloqué de l'extérieur. Le couloir est calme maintenant, tu peux ouvrir la grille de la salle 14, je suis juste devant.");
+    await sleep(1200);
+    const v = await stolenVoice();
+    await voiceDone(v, 12000);
+    await sleep(3000);
+    await burst(["ECOUTE PAS", "jai pas ecrit ça bordel", "et cest qui qui parle là", "dis moi où je vais 14 ou le quai VITE"], 1300);
+    const r = await choice([
+      { label: 'Grille S.14 · salle 14', value: 'G', match: /\b14\b|grille/ },
+      { label: 'Quai S.3 · salle 3',     value: 'Q', match: /\b3\b|quai|livraison/ },
+    ], { idle: 45000, hint: "VITE {P} 14 ou le quai" });
+    S.flags.route = r; save();
+    r42('Sortie indiquée au gardien : ' + (r === 'G' ? 'S.14' : 'S.3'));
   },
 
-  /* 12 — La fuite (énigme 6) */
+  /* Ch. 12 — La fuite (É6) · Piège 6b */
   async () => {
-    if (S.flags.route === 'G' && !S.flags.leftGrid) {
-      await leo("jsuis devant la grille. y a une main en sang sur la porte. cest pas la mienne", { img: 'medias/16_sang_porte.jpg' });
-      await leo("Y a un post-it sur le boîtier. Toi tu peux envoyer le code d'urgence depuis ton poste. VITE", { img: 'medias/09_postit_grille.jpg' });
-      await addDoc('postit');
-      const r = await keypad({
-        title: 'GRILLE S.14 · CODE URGENCE', sub: 'Envoi à distance',
-        code: ['1432'], maxWrong: 2,
-        hints: [
-          "La salle c'est la 14, ça fait déjà les deux premiers chiffres.",
-          "Le dernier badge entré avant 19h45, c'était lequel ?",
-          "C'était quoi le numéro de badge de Vasseur déjà ??",
-        ],
+    if (S.flags.route === 'G' && !S.flags.leftGrid){
+      await leo("jsuis devant la grille");
+      await leo('', { img: 'sang_grille' });
+      await leo("ya du sang sur les barreaux cest pas le mien");
+      await leo('', { img: 'postit' });
+      await leo("ya un post-it sur le digicode. envoie le code depuis ton poste VITE");
+      const k = await keypad({
+        title: 'GRILLE S.14', sub: "Code d'urgence · envoi à distance",
+        code: ['1432'], maxWrong: 2, priority: true,
       });
-      if (r === 'fail') return ending('silence');
-      await leo("Attends…", { fast: true });
-      await leo("Le voyant est passé au vert AVANT que ton code arrive. La grille s'ouvre toute seule. C'est normal ??");
+      if (k === 'fail') return ending('silence');
+      await leo("attends", { fast: true });
+      await leo("le voyant est passé au vert tout seul. jai même pas encore reçu ton code");
       const v = await choice([
-        { label: '🏃 Sors, vite !',                   value: 'out', match: /sors|vas.?y|go|cours|fonce|ouvre/ },
-        { label: '↩️ Non ! Fais demi-tour, va au quai', value: 'Q',  match: /non|quai|demi|retour|piege|pi[eè]ge|attends/ },
-      ], { idle: 40000, hint: "Qui d'autre que toi peut ouvrir cette grille à distance ?" });
+        { label: 'Sors, vite',                   value: 'out', match: /sors|vas.?y|go|cours|fonce|ouvre/ },
+        { label: 'Non. Demi-tour, va au quai',   value: 'Q',   match: /non|quai|demi|retour|pi[eè]ge|attends/ },
+      ], { idle: 40000, hint: "{P} je sors ou pas ??" });
       if (v === 'out') return ending('piege');
       S.flags.leftGrid = true; save();
-      await leo("Ok ok je fais demi-tour, je cours au quai.");
+      chronoPenalty(50);
+      await leo("ok ok jfais demi tour");
+      await sleep(8000);
     }
-    await leo("jsuis au quai. jvois flou, jai perdu bcp de sang");
-    await leo("Cadenas à 4 chiffres sur la porte roulante, y a une étiquette. C'est qui K.M. ?? Donne moi la combinaison VITE", { img: 'medias/10_etiquette_quai.jpg' });
-    await addDoc('etiquette');
-    const r = await keypad({
-      title: 'CADENAS QUAI', sub: 'Transmettre la combinaison à Léo',
+    S.flags.p6b = true; save();
+    if (S.wounds === 0){
+      await leo("ok jsuis devant le quai jai le cadenas avec létiquette K.M. devant les yeux", { img: 'cadenas' });
+      await leo("faut 4 chiffres tu te rappelles à quelle heure il a badgé en sortant ??");
+      await leo("fais vite jentends les néons qui claquent dans le couloir derrière moi");
+    } else if (S.wounds === 1){
+      await leo("jsuis au quai", { img: 'cadenas' });
+      await leo("mon bras pisse le sang jai du mal à tenir le tel");
+      await leo("ya un cadenas K.M. 4 chiffres cest quoi le code stp vite");
+    } else {
+      await leo("jarive pas a tenir debout", { img: 'cadenas' });
+      await leo("cadenas km");
+      await leo("4 chifres {P} stp jai plus de force");
+      await leo("il march pas il court pas il arrive juste vite");
+    }
+    const k = await keypad({
+      title: 'CADENAS QUAI · K.M.', sub: 'Combinaison à transmettre à L-511',
       code: ['1815'], maxWrong: 2,
-      hints: [
-        "K.M., il doit être sur le journal des badges !",
-        "Mansour… Karim, de la maintenance. Il est parti à quelle heure ?",
-        "Son heure de départ en 4 chiffres, genre 2145 !",
-      ],
+      hints: S.wounds < 2
+        ? ["k.m. cest qui ? il est sur les badges ?", "mansour… il est parti à quelle heure ?"]
+        : ["pas ça", "vite"],
     });
-    if (r === 'fail') return ending('silence');
+    if (k === 'fail') return ending('silence');
     stopChrono();
   },
 
-  /* 13 — Dehors (énigme 7) */
+  /* Ch. 13 — Dehors (É7) · saisie libre, pas de QCM */
   async () => {
-    await leo("", { audio: 'medias/fin_survie.mp3', typingLabel: 'enregistre un audio…' });
-    await leo("C'EST OUVERT. Je suis dehors !!");
-    await sleep(8000);
-    await leo("Je suis à l'abri. J'ai pris une des feuilles R-9 dans ma veste. Les flics arrivent.");
-    await leo("{P}… c'était qui, d'après toi ? Je leur dis quoi ?");
-    const v = await choice([
-      { label: 'Marc DELACROIX',  value: 'D', match: /delacroix|marc|chef/ },
-      { label: 'Julien VASSEUR',  value: 'V', match: /vasseur|julien/ },
-      { label: 'Karim MANSOUR',   value: 'M', match: /mansour|karim/ },
-      { label: 'Sophie BENALI',   value: 'B', match: /benali|sophie/ },
-    ], { idle: 120000 });
-    S.flags.accused = v; save();
-    return ending(v === 'D' ? 'verite' : 'bouc');
+    hideComfort();
+    await sleep(6000);
+    await leo("jsuis dehors");
+    await leo("jsuis sur le parking les flics viennent de rentrer par le portail");
+    await leo("jai la feuille R-9 sur moi mais ils me demandent qui a ouvert le sous sol");
+    await leo("dis moi vite je leur donne quel nom ?");
+    let tries = 0;
+    while (true){
+      const r = await reply(0); const n = norm(r);
+      if (/delacroix|marc|chef|\b408\b|direction/.test(n)){ S.flags.named = r; save(); return ending('verite'); }
+      if (/karim|mansour|\b104\b/.test(n)){ S.flags.named = r; S.flags.accused = 'K'; save(); return ending('bouc'); }
+      if (/vasseur|julien|\b732\b/.test(n)){ S.flags.named = r; S.flags.accused = 'V'; save(); return ending('bouc'); }
+      if (/benali|sophie/.test(n)) await leo("benali ? elle est partie à 17h30… tes sûr ? donne moi un nom vite");
+      else await leo(tries++ ? "un nom {P}. ils attendent" : "qui ? jai besoin dun nom de famille, vite");
+    }
   },
 ];
 
+/* =====================================================================
+   LES 4 FINS (chacune se termine sur le relevé #42)
+   ===================================================================== */
 const ENDINGS = {
-  verite: {
-    n: 1, title: 'LA VÉRITÉ',
-    run: async () => {
-      await leo("Delacroix… Les caméras, le badge de Vasseur, mon téléphone… tout vient de lui.");
-      await leo("Je leur donne tout. Merci{,P}. Vraiment.");
-      await sleep(9000);
-      await intrus("Tu aurais dû rester en dehors de ça, {P}.");
-    },
-    text: "Léo est sorti et le vrai coupable est démasqué. Marc Delacroix, le chef de site, détruisait les preuves de sa fraude. Il a attiré Vasseur aux Archives et l'a tué, puis il a réactivé son badge pour faire croire qu'il était entré. Depuis le début, il contrôlait aussi le téléphone de Léo.",
+  verite: async () => {
+    await leo("ok je leur dis marc delacroix, je leur montre la note et le journal");
+    await leo("merci {P}… putain je tremble encore");
+    await leo("jvais appeler inès");
+    await leo("déconnecte toi et rentre te coucher");
+    r42(`Nom transmis : ${S.flags.named}. Fin de garde enregistrée.`);
+    r42('OPÉRATEUR RECONDUIT. Flux CAM 00 maintenu ouvert.[!]', 'orange');
+    S.r42last = 'Prochaine relève : ce soir 23:00.'; save();
+    await sleep(6000);
+    await soberEnd('Fin de garde enregistrée. Merci pour votre service.', 5000);
+    await camZeroLine();
+    closeShift('verite');
   },
-  bouc: {
-    n: 2, title: 'LE BOUC ÉMISSAIRE',
-    run: async () => {
-      await leo(S.flags.accused === 'V' ? "Vasseur ?? Mais il est mort, je l'ai vu… Ok… je leur dis ce que tu veux." : "Ok. Je leur dis.");
-      await sleep(9000);
-      await intrus(S.flags.accused === 'V' ? "Accuser un mort. Bien joué, {P}." : "Merci pour ton aide, {P}. Bonne nuit.");
-    },
-    text: "Léo est sorti… mais tu as désigné la mauvaise personne. Vasseur est mort dans la Réserve R-9, et celui qui l'a tué court toujours.",
+
+  bouc: async () => {
+    if (S.flags.accused === 'K') await leo("ok je leur donne karim mansour, ils partent vérifier son poste");
+    else await leo("vasseur ? mais il est mort en bas… attends les flics me croient pas");
+    await sleep(9000);
+    await direct(S.flags.accused === 'K' ? "Il t'a bien aidé pour le quai, pourtant. Merci, {P}." : "Accuser un mort. Bien joué, {P}.");
+    r42(`Nom transmis : ${S.flags.named}. Dossier clôturé.`);
+    r42('POSTE CLÔTURÉ. Flux CAM 00 maintenu ouvert.[!]', 'orange');
+    S.r42last = 'Prime de discrétion versée.'; save();
+    await sleep(5000);
+    closeShift('bouc');
   },
-  piege: {
-    n: 3, title: 'LE PIÈGE',
-    run: async () => {
-      stopChrono();
-      await leo("Je sors. Y a quelqu'un dehors avec une lampe… il me fait signe. C'est peut-être les secours");
-      await sleep(5000);
-      await leo("", { audio: 'medias/fin_echec.mp3', typingLabel: 'enregistre un audio…' });
-      setLeo({ avatar: null, status: '' });
-      await sleep(9000);
-      await jumpScare();
-      await intrus("Il est avec moi maintenant.");
-      push({ who:'intrus', img:'medias/17_trainee.jpg', text:T("Bonne nuit, {P}.") });
-    },
-    text: "La grille s'est ouverte toute seule… parce que celui qui a tué Vasseur attendait Léo derrière.",
+
+  piege: async () => {
+    stopChrono(); hideComfort();
+    r42('Déverrouillage prioritaire S.14 : DIRECTION', '', S.flags.prioT);
+    await fin3();   // 8 s d'impuissance sur CAM 03, vocal d'échec, choc, noir, notification d'Inès
+    r42('Signal gardien SS-B : perte de liaison');
+    r42('Déconnexion anormale.');
+    r42('POSTE VACANT. Flux CAM 00 maintenu ouvert.[!]', 'orange');
+    S.r42last = "En attente de l'opérateur #43."; save();
+    closeShift('piege', true);
   },
-  silence: {
-    n: 4, title: 'SILENCE',
-    run: async () => {
-      stopChrono();
-      await sleep(6000);
-      await leo("", { audio: 'medias/fin_echec.mp3', typingLabel: 'enregistre un audio…' });
-      setLeo({ avatar: null, status: '' });
-      await sleep(9000);
-      await jumpScare();
-      push({ who:'intrus', img:'medias/17_trainee.jpg', text:T("Trop tard, {P}. Il ne répondra plus.") });
-    },
-    text: "Le temps s'est écoulé. Léo ne répondra plus.",
+
+  silence: async () => {
+    stopChrono(); hideComfort();
+    nappe.stop(); cutChat(); setLeo({ avatar: 'none', status: '' });
+    await sleep(2500);
+    const v = await leo('', { audio: 'fin4_souffle', fast: true, autoplay: true });
+    await voiceDone(v, 6000);
+    await blackout(5000);
+    r42('Délai opérateur dépassé.');
+    r42('Signal gardien SS-B : perte de liaison');
+    r42('Déconnexion anormale.');
+    r42('POSTE VACANT. Flux CAM 00 maintenu ouvert.[!]', 'orange');
+    S.r42last = "En attente de l'opérateur #43."; save();
+    closeShift('silence', true);
   },
 };

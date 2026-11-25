@@ -1,14 +1,22 @@
-# La Relève
+# La Relève — appli VEILLE (v2.5)
 
-Jeu d'horreur interactif sur téléphone. Le joueur est l'opérateur de télésurveillance de nuit des Archives Nord. Léo, le gardien, est coincé au sous-sol avec un intrus. Environ 45 minutes, 7 énigmes et 4 fins.
+Jeu d'horreur psychologique et d'enquête en temps réel sur smartphone, 100 % autonome, environ 45 minutes, **interdit aux moins de 18 ans**. Le joueur devient l'opérateur·rice #42 de télésurveillance de nuit des Archives Nord. Léo (L-511) est le gardien du Sous-Sol B.
 
-- **Jouer :** `https://9wsv9ngdft-cmd.github.io/la-releve/` (de préférence ajouté à l'écran d'accueil, de nuit, avec des écouteurs).
-- **`index.html`** : le moteur de l'appli (interphone, caméras, dossiers, digicode, appel, caméra et micro du joueur).
-- **`histoire.js`** : toute l'histoire. C'est le seul fichier à modifier pour changer les textes, les énigmes ou les fins.
-- **`medias/`** : les images, les sons et la vidéo.
-- **`mj/`** : l'ancienne console pour jouer Léo à la main depuis un vrai numéro WhatsApp.
-- **`gen/`** : les scripts qui ont généré les documents, les sons et les images.
+- **Jouer :** `https://9wsv9ngdft-cmd.github.io/la-releve/` (Safari › Partager › « Sur l'écran d'accueil », la nuit, seul, lumière éteinte, écouteurs, volume à moitié).
+- **Créneau :** le portail n'ouvre de relève qu'entre 22:00 et 04:00 (prise de poste conseillée à 23:14).
+- **Tester :** ajouter `?fast=1` à l'adresse (tout va plus vite et le créneau est contourné).
+- **Recommencer :** toucher 5 fois « VEILLE » en haut de l'écran (portail, appli ou relevé). Cela efface aussi la mémoire de fin de partie : sans ça, le portail affiche le statut du poste #42 indéfiniment.
 
-Pour tester vite : ajoute `?fast=1` à l'adresse. Pour recommencer une partie : touche 5 fois « VEILLE » en haut de l'écran.
+## Fichiers
 
-⚠️ Jeu d'horreur pour 16 ans et plus : sang, cadavre, sursauts, flashs. La caméra et le micro sont utilisés uniquement sur le téléphone : rien n'est enregistré ni envoyé.
+- **`index.html`** : le moteur (portail, interphone, caméras, dossiers, pièges, son, relevé #42).
+- **`histoire.js`** : toute l'histoire (chapitres 1 à 13, 4 fins, textes, liste des médias).
+- **`medias/`** : images et sons. **`medias/provisoire/`** : médias de remplacement générés en attendant les vrais.
+- **`gen/`** : scripts de génération (`docs.py` pour les documents, `provisoires.py` pour les médias provisoires).
+- **`mj/`** : l'ancienne version MJ WhatsApp (inchangée, utilise toujours les anciens fichiers `01_` à `17_`).
+
+## Remplacer un média provisoire
+
+Il suffit de déposer le fichier final dans `medias/` **avec le nom du kit de production** (par ex. `medias/vitre_silhouette.jpg`, `medias/audio0_leo_ancrage.mp3`, `medias/nappe_ssb.m4a`). Le jeu charge toujours le fichier final s'il existe, et ne prend le provisoire qu'en son absence. La liste complète des noms est en haut de `histoire.js` (objet `MEDIA`).
+
+La caméra et le micro sont traités uniquement sur le téléphone : la photo de badge, le portrait et la voix restent en mémoire vive et ne sont jamais sauvegardés. Seuls le prénom, la fin obtenue et le texte du journal #42 restent sur l'appareil.
