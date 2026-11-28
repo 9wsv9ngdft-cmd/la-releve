@@ -143,6 +143,10 @@
   .cam .rc{position:absolute;right:6px;top:5px;font-family:var(--mono);font-size:8.5px}
   .cam .lost{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:#9a5555;background:#050505;letter-spacing:2px;text-align:center}
   .cam.off .lost{display:flex}
+  .cam.blip img{filter:grayscale(.6) contrast(1.1) brightness(.55)}
+  .cam.blip .noise{opacity:.55}
+  .cam.flick img{animation:flick .5s steps(1) 1}
+  @keyframes flick{0%{filter:grayscale(.6) brightness(1.35)}25%{filter:grayscale(.6) brightness(.5)}50%{filter:grayscale(.6) brightness(1.2)}75%{filter:grayscale(.6) brightness(.7)}}
   .noise{position:absolute;inset:0;width:100%;height:100%;opacity:.12;mix-blend-mode:screen;pointer-events:none;image-rendering:pixelated}
   .cam.off .noise{opacity:.3}
   .docs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
@@ -172,6 +176,7 @@
   .term .h{color:#e3f7e8}
   .term .sep{color:#2f6a40;overflow:hidden;white-space:nowrap}
   .term .orange{color:var(--orange)}
+  .term .rst{margin-top:22px;font-size:9.5px;color:#4d6b57}
   .term .cur{animation:blink 1s steps(1) infinite}
   .term table{border-collapse:collapse;width:100%;margin:8px 0;font-size:10.5px}
   .term td,.term th{border:1px solid #2f6a40;padding:3px 4px;text-align:left;vertical-align:middle}
@@ -360,7 +365,12 @@ function imgEl(key){ const i = new Image(); i.alt = ''; setImg(i, key); return i
    SON (Web Audio) : limiteur général à −6 dBFS environ
    ========================================================= */
 let AC = null, master = null, voiceBus = null;
+/* iOS 17+ : session « playback » = le son passe même si l'interrupteur silencieux est activé.
+   Pendant une capture micro, on repasse en « play-and-record ». */
+function aSess(t){ try { if (navigator.audioSession && navigator.audioSession.type !== t) navigator.audioSession.type = t; } catch(e){} }
 function audioInit(){
+  aSess('playback');
+  if (S.started && !S.ended && !wake) keepAwake();
   try {
     if (!AC){
       AC = new (window.AudioContext||window.webkitAudioContext)();
@@ -468,7 +478,7 @@ function interphone(ctx, input, out, { muffle = 0, wet = 0.12, dur = 10 } = {}){
 }
 
 /* ---------- micro : capture en mémoire vive ---------- */
-async function micOpen(){ return navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false } }); }
+async function micOpen(){ aSess('play-and-record'); return navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false } }); }
 function recorder(stream){
   audioInit();
   const src = AC.createMediaStreamSource(stream), an = AC.createAnalyser(); an.fftSize = 1024;
@@ -481,7 +491,7 @@ function recorder(stream){
     start(){ chunks = []; rec = true; },
     stop(){ rec = false; const n = chunks.reduce((s,c)=>s+c.length,0), out = new Float32Array(n); let o = 0; chunks.forEach(c => { out.set(c,o); o += c.length; }); return out; },
     rms(){ an.getFloatTimeDomainData(a); let r = 0; for (const x of a) r += x*x; return Math.sqrt(r/a.length); },
-    close(){ try { src.disconnect(); pr.disconnect(); } catch(e){} stream.getTracks().forEach(t => t.stop()); },
+    close(){ try { src.disconnect(); pr.disconnect(); } catch(e){} stream.getTracks().forEach(t => t.stop()); setTimeout(() => aSess('playback'), 300); },
   };
 }
 function voiced(x, sr){  // renvoie [début, fin] (échantillons) de la parole
@@ -598,7 +608,7 @@ function portal(){
     o.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); F0[o.dataset.f] = b.dataset.v;
   }));
   let phDone = false, voDone = false;
-  $('pSnd').onclick = () => { audioInit(); sfx.test(); $('pSndS').textContent = '3 tonalités émises · vérifier les deux écouteurs'; };
+  $('pSnd').onclick = () => { audioInit(); sfx.test(); $('pSndS').textContent = '3 tonalités émises · vérifier les deux écouteurs. Rien entendu ? Vérifiez le bouton silencieux sur la tranche du téléphone.'; };
   $('pPh').onclick = async () => { audioInit(); await takeBadge(); phDone = true; };
   $('pVo').onclick = async () => {
     audioInit();
@@ -818,22 +828,26 @@ function showOv(id){ $(id).classList.add('on'); }
 function hideOv(id){ $(id).classList.remove('on'); }
 
 /* ---------- relevés (terminal VEILLE) ---------- */
-function terminal(poste, sub, lines, last, { typed = false, onLine = null } = {}){
+function terminal(poste, sub, lines, last, { typed = false, onLine = null, foot = '' } = {}){
   const t = document.createElement('div'); t.className = 'term';
   const head = [`<div class="h">VEILLE · JOURNAL DE SESSION ARCHIVÉ — POSTE #${poste}</div>`, `<div>${sub}</div>`, `<div class="sep">──────────────────────────────────────────────</div>`];
   t.innerHTML = head.join('');
   const rows = lines.map(([h, txt, cls]) => { const d = document.createElement('div'); d.textContent = `${h} – ${txt}`; if (cls) d.className = cls; return d; });
   const lastD = document.createElement('div'); lastD.style.marginTop = '12px'; lastD.innerHTML = '<span></span><span class="cur">▌</span>'; lastD.firstChild.textContent = last;
-  if (!typed){ rows.forEach(r => t.appendChild(r)); t.appendChild(lastD); return t; }
+  const footD = foot ? Object.assign(document.createElement('div'), { className: 'rst', textContent: foot }) : null;
+  if (!typed){ rows.forEach(r => t.appendChild(r)); t.appendChild(lastD); if (footD) t.appendChild(footD); return t; }
   (async () => {
     for (let i = 0; i < rows.length; i++){ await rawSleep(480 * Math.max(F, .3)); if (!t.isConnected) return; t.appendChild(rows[i]); sfx.key(); if (onLine) onLine(lines[i]); }
-    await rawSleep(500); if (t.isConnected) t.appendChild(lastD);
+    await rawSleep(500); if (t.isConnected){ t.appendChild(lastD); if (footD) t.appendChild(footD); }
   })();
   return t;
 }
 function r42(text, cls = '', ts = Date.now()){ S.r42.push({ ts, text, cls }); save(); }
 function r42lines(){ return S.r42.slice().sort((a,b) => a.ts - b.ts).map(e => [hms(e.ts), e.text, e.cls]); }
-function rel42(typed){ return terminal('42', `ID : V-042 · Site : SS-B · Relève ${S.court ? 'courte' : 'de nuit'} · Réf. ${ref()}`, r42lines(), S.r42last || '', { typed }); }
+function rel42(typed){
+  const foot = S.ended ? 'Proc. 7.3-b · Réinitialisation du poste : toucher 5 fois « VEILLE ».' : '';
+  return terminal('42', `ID : V-042 · Site : SS-B · Relève ${S.court ? 'courte' : 'de nuit'} · Réf. ${ref()}`, r42lines(), S.r42last || '', { typed, foot });
+}
 function rel41(typed, onLine){ return terminal('41', 'ID : V-041 · Site : SS-B · Relève de nuit', R41, R41_LAST, { typed, onLine }); }
 function showRel(typed){
   $('relX').textContent = 'VEILLE'; $('relBody').innerHTML = ''; $('relBody').appendChild(rel42(typed)); showOv('rel');
@@ -949,10 +963,13 @@ function renderCams(){
     // Piège 6c : la silhouette n'existe que dans la miniature, puis disparaît
     S.flags.periphShown = 1; save();
     setTimeout(() => { if (!S.flags.periphDone){ S.flags.periphDone = 1; save(); renderCams(); } }, 20000 * Math.max(F, .3));
+    // micro-événement muet pour accrocher le regard périphérique : baisse de luminosité, puis vacillement
+    setTimeout(() => camBlip('c1', 'blip', 450), 120);
+    setTimeout(() => { if (!S.flags.periphDone) camBlip('c1', 'flick', 520); }, 7000 * Math.max(F, .3));
   }
   CAMS.forEach(c => {
     const st = S.cams[c.id] || {};
-    const d = document.createElement('div'); d.className = 'cam' + (st.off ? ' off' : ''); d.id = 'cam-' + c.id;
+    const d = document.createElement('div'); d.className = 'cam' + (st.off ? ' off' : ''); d.id = 'cam-' + c.id; d.dataset.c = c.id;
     if (c.id === 'c0'){ if (S.flags.portrait && MEM.portrait){ const i = new Image(); i.src = MEM.portrait; d.appendChild(i); } }
     else d.appendChild(imgEl(camKey(c)));
     d.insertAdjacentHTML('beforeend', `<canvas class="noise" width="60" height="45"></canvas><div class="lbl">${mini ? c.label.split(' · ')[0] : c.label}</div><div class="rc rec">●</div><div class="clk"></div><div class="lost">SIGNAL<br>PERDU</div>`);
@@ -961,8 +978,17 @@ function renderCams(){
   });
   });
 }
+/* Parasite visuel muet sur une caméra (bande du chat + onglet caméras).
+   kind : 'flick' (néon qui vacille) ou 'blip' (baisse de luminosité). */
+function camBlip(id, kind = 'flick', ms = 500){
+  document.querySelectorAll(`.cam[data-c="${id}"]`).forEach(d => {
+    if (d.classList.contains('off')) return;
+    d.classList.remove(kind); void d.offsetWidth; d.classList.add(kind);
+    setTimeout(() => d.classList.remove(kind), ms * Math.max(F, .5));
+  });
+}
 function camSet(id, o){ S.cams[id] = Object.assign({}, S.cams[id] || {}, o); save(); renderCams(); }
-let cvTimer = null;
+let cvTimer = null, cvCut = false;
 function camOpen(c){
   const st = S.cams[c.id] || {};
   if (st.off) return;
@@ -976,13 +1002,17 @@ function camOpen(c){
   showOv('cv');
   clearTimeout(cvTimer);
   if (c.id === 'c3' && S.flags.cam03 === 1){
+    // vide acoustique de 1,5 s juste avant la silhouette collée à l'objectif
     cvTimer = setTimeout(() => {
-      setImg(img, 'cam03_obj');
-      cvTimer = setTimeout(() => { setImg(img, 'cam03_vide'); S.flags.cam03 = 2; save(); camSet('c3', { src: 'cam03_vide' }); }, 800);
-    }, 3500);
+      nappe.cut(); cvCut = true;
+      cvTimer = setTimeout(() => {
+        setImg(img, 'cam03_obj');
+        cvTimer = setTimeout(() => { setImg(img, 'cam03_vide'); S.flags.cam03 = 2; save(); camSet('c3', { src: 'cam03_vide' }); cvCut = false; nappe.back(); }, 800);
+      }, 1500);
+    }, 2000);
   }
 }
-$('cvX').onclick = () => { clearTimeout(cvTimer); hideOv('cv'); renderCams(); };
+$('cvX').onclick = () => { clearTimeout(cvTimer); if (cvCut){ cvCut = false; nappe.back(); } hideOv('cv'); renderCams(); };
 
 /* ---------- horloge et chrono ---------- */
 function tick(){
@@ -1002,7 +1032,7 @@ function startChrono(sec){
   if (!S.chronoEnd){ S.chronoEnd = Date.now() + sec * 1000 * F; save(); }
   tick.over = false; relances.forEach(clearTimeout);
   const lines = [["jentends ses pas dépêche toi"], ["il est là", "il est là", "aide moi"]];
-  relances = (S.court ? [45, 100] : [90, 180]).map((s, i) => setTimeout(() => { if (S.chronoEnd && !S.ended) lines[i].forEach((l, j) => setTimeout(() => push({ who:'leo', text:l }), j * 700)); }, s * 1000 * F));
+  relances = (S.court ? [45, 100] : [90, 180]).map((s, i) => setTimeout(() => { if (S.chronoEnd && !S.ended) lines[i].forEach((l, j) => relances.push(setTimeout(() => { if (S.chronoEnd && !S.ended) push({ who:'leo', text:l }); }, j * 700))); }, s * 1000 * F));
 }
 function stopChrono(){ S.chronoEnd = 0; save(); relances.forEach(clearTimeout); tick(); }
 function chronoPenalty(s){ if (S.chronoEnd){ S.chronoEnd -= s * 1000 * F; save(); tick(); } }
@@ -1043,7 +1073,13 @@ let sab = null;
 $('form').addEventListener('submit', e => {
   e.preventDefault(); let v = $('msg').value.trim(); if (!v || $('msg').disabled) return;
   $('msg').value = ''; maxLen = 0; lastInput = Date.now();
-  if (sab){ v = sab.text; const f = sab.done; sab = null; push({ who:'player', text:v }); f(); return; }
+  if (sab){
+    // Ch. 9 : le message part intact, puis change en silence dans l'historique
+    const s = sab; sab = null; s.stop();
+    const m = push({ who:'player', text:v });
+    setTimeout(() => { m.text = s.text; save(); rerender(m); s.done(); }, 2600 * Math.max(F, .3));
+    return;
+  }
   push({ who:'player', text:v });
   if (RM === 'instant') markRead();
   else if (RM === 'auto') setTimeout(() => { if (RM === 'auto') markRead(); }, 2200);
@@ -1082,7 +1118,7 @@ function choice(opts, { idle = 0, hint = '' } = {}){
 function sabotage(text, ms){
   return cancellable(done => {
     let t = setTimeout(() => { if (sab){ sab = null; push({ who:'player', text }); done(); } }, ms * F);
-    sab = { text, done: () => { clearTimeout(t); done(); } };
+    sab = { text, stop: () => clearTimeout(t), done: () => { clearTimeout(t); done(); } };
   });
 }
 
@@ -1286,8 +1322,8 @@ async function fakeCrash(msgs){
   crashing = true; const ts = Date.now(), t = hhmm();
   frozen = true; $('app').classList.add('frozen'); hideOv('lb'); hideOv('cv');
   await rawSleep(1100);
-  showOv('crash'); await rawSleep(4000); hideOv('crash');
-  showOv('load'); await rawSleep(1000); hideOv('load');
+  nappe.cut(); showOv('crash'); await rawSleep(4000); hideOv('crash');
+  showOv('load'); await rawSleep(1000); hideOv('load'); nappe.back();
   frozen = false; $('app').classList.remove('frozen'); tick();
   await journal('Session restaurée · 6 s de flux perdus · cause : inconnue');
   r42('Interruption de session (00:06). Cause inconnue.', '', ts);
@@ -1391,11 +1427,17 @@ async function stolenVoice(){
       const total = 1.5 + v4.length / sr + 1.5 + pr.length / sr + 1 + ouvrir.length / sr + 0.3;
       const oc = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, Math.ceil(total * sr), sr);
       const bus = oc.createGain(); bus.gain.value = 1.6;
-      interphone(oc, bus, oc.destination, { dur: total });
-      const hiss = oc.createBuffer(1, Math.floor(1.5 * sr), sr), hx = hiss.getChannelData(0); let l = 0; for (let i = 0; i < hx.length; i++){ l += 0.1 * ((Math.random()*2-1) - l); hx[i] = l * 0.05; }
-      let t = 0; const put = (arr, at) => { const b = oc.createBuffer(1, arr.length, sr); b.getChannelData(0).set(arr); const s = oc.createBufferSource(); s.buffer = b; s.connect(bus); s.start(at); };
-      const hs = oc.createBufferSource(); hs.buffer = hiss; hs.connect(oc.destination); hs.start(0);
-      t = 1.5; put(v4, t); t += v4.length / sr + 1.5; put(pr, t); t += pr.length / sr + 1; put(ouvrir, t);
+      const outG = oc.createGain(); outG.connect(oc.destination);           // sortie commune : permet la micro-coupure
+      interphone(oc, bus, outG, { dur: total });
+      // fond de ligne continu, sans respiration (la chose imite les voix sans respirer)
+      const hiss = oc.createBuffer(1, Math.ceil(total * sr), sr), hx = hiss.getChannelData(0); let l = 0; for (let i = 0; i < hx.length; i++){ l += 0.1 * ((Math.random()*2-1) - l); hx[i] = l * 0.05; }
+      let t = 0; const put = (arr, at, rate = 1) => { const b = oc.createBuffer(1, arr.length, sr); b.getChannelData(0).set(arr); const s = oc.createBufferSource(); s.buffer = b; s.playbackRate.value = rate; s.connect(bus); s.start(at); };
+      const hs = oc.createBufferSource(); hs.buffer = hiss; hs.connect(outG); hs.start(0);
+      t = 1.5; put(v4, t); t += v4.length / sr + 1.5;
+      // micro-coupure sèche (~20 ms) de tout le fond entre deux mots, juste avant le prénom
+      const cutAt = t - 0.35; outG.gain.setValueAtTime(1, cutAt); outG.gain.setValueAtTime(0, cutAt + 0.001); outG.gain.setValueAtTime(1, cutAt + 0.021);
+      put(pr, t, 0.97);                                                    // cassure d'intonation légère sur le prénom
+      t += pr.length / sr / 0.97 + 1; put(ouvrir, t);
       const out = await new Promise((res, rej) => { oc.oncomplete = e => res(e.renderedBuffer); const p = oc.startRendering(); if (p && p.then) p.then(res, rej); });
       MEM.v5 = out;
       r42('Empreinte vocale opérateur diffusée (liaison L-511)');
@@ -1445,7 +1487,7 @@ function closeShift(id, full){
   if (!S.docs.includes('r42')) S.docs.push('r42');
   save(); nappe.stop(); renderDocs(); cutChat(); setLeo({ status: S.leo.avatar === 'none' ? '' : 'hors ligne' });
   if (full){ showRel(true); hideOv('black'); }
-  else { hideOv('black'); hideOv('sober'); badge('docs', 1); }
+  else { hideOv('black'); hideOv('sober'); push({ who: 'doc', doc: 'r42', text: DOCS.r42.title }); badge('docs', 1); }
 }
 
 /* =========================================================

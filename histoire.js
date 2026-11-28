@@ -103,7 +103,7 @@ const CAMS = [
    img = image du MEDIA affichée au-dessus des lignes. */
 const BRIEFING = {
   titre: 'ARCHIVES NORD · FORMATION',
-  intro: ['FORMATION OBLIGATOIRE', 'Avant votre première nuit de surveillance, une courte présentation (1 min).', 'Mettez vos écouteurs.'],
+  intro: ['FORMATION OBLIGATOIRE', 'Avant votre première nuit de surveillance, une courte présentation (1 min).', 'Mettez vos écouteurs.', 'Avant de commencer : bouton silencieux désactivé (sur la tranche), verrouillage automatique sur «\u00a0Jamais\u00a0», mode Ne pas déranger.'],
   lancer: 'COMMENCER',
   cartons: [
     { lines: ['ARCHIVES NORD', 'Service de surveillance de nuit', 'Formation des nouveaux opérateurs'], hold: 1.5, style: 'head' },
@@ -161,7 +161,9 @@ const CHAPTERS = [
   async () => {
     nappe.start();
     await addDoc('acces', true, true); await addDoc('equipe', true); await addDoc('plan', true);
-    await sleep(C(5000, 3000));
+    await sleep(C(2500, 1500));
+    camBlip('c2');                      // parasite bénin : la bande caméras est un flux vivant
+    await sleep(C(2500, 1500));
     await leo("salut ?");
     await leo("ah nickel ya quelqun au poste ce soir");
     await leo(C("léo, garde de nuit ss-b. jai cru que jallais encore faire la ronde tout seul comme mardi", "léo, garde de nuit ss-b"));
@@ -214,7 +216,7 @@ const CHAPTERS = [
   /* Ch. 3 — Journal des badges (É1) · Piège 13 */
   async () => {
     await sleep(C(9000, 5000));
-    for (let i = 0; i < C(3, 2); i++){ await ghostTyping(2600); await sleep(C(4000, 3000)); }
+    for (let i = 0; i < C(3, 2); i++){ await ghostTyping(2600); if (i === 0) camBlip('c3'); await sleep(C(4000, 3000)); }
     await sleep(C(6000, 3000));
     await leo("bon jsuis au poste de garde");
     await leo('', { img: 'registre' });
@@ -312,7 +314,9 @@ const CHAPTERS = [
   /* Ch. 6 — MAINT-104 et l'écran observé (É3) · Pièges 3, 4, 7a */
   async () => {
     S.flags.p3 = true; save();
-    await sleep(C(6000, 4000));
+    await sleep(C(3000, 2000));
+    camBlip('c3', 'blip', 400);
+    await sleep(C(3000, 2000));
     await leo("attends faut que je te dise un truc", { fast: true });
     await sleep(C(3500, 2500));
     deleteLast(); microGlitch();
@@ -446,7 +450,10 @@ const CHAPTERS = [
     startChrono(S.court ? (S.flags.silFail ? 120 : 150) : (S.flags.silFail ? 240 : 300));
     if (!S.court) showComfort();       // relève courte : pas de bouton Confort opérateur (Piège 7b)
     camSet('c3', { src: 'cam03_sil' }); S.flags.cam03 = 1; save();
-    await sleep(C(6000, 4000));
+    await sleep(C(2500, 1500));
+    // garder le regard sur CAM 03 au moins 3,5 s (la silhouette surgit collée à l'objectif)
+    await leo(C("attends. regarde cam 03 la grille. tout au fond à gauche, la porte elle bouge ou cest moi ?", "regarde cam 03. au fond à gauche, la porte elle bouge ?"));
+    await sleep(C(3500, 2500));
     await faux("Le quai est bloqué de l'extérieur. Le couloir est calme maintenant, tu peux ouvrir la grille de la salle 14, je suis juste devant.");
     await sleep(1200);
     const v = await stolenVoice();
