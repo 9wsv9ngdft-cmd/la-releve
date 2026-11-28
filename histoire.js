@@ -110,28 +110,31 @@ const PORTAIL = {
 /* =====================================================================
    CHAPITRES (Ch. 0 = portail, géré par le moteur)
    ===================================================================== */
+/* Relève courte (20 min) : C(normal, courte) choisit la valeur selon le format de garde. */
+const C = (n, c) => S.court ? c : n;
+
 const CHAPTERS = [
 
   /* Ch. 1 — Prise de poste (0–3 min) */
   async () => {
     nappe.start();
-    await sleep(5000);
+    await sleep(C(5000, 3000));
     await leo("salut ?");
     await leo("ah nickel ya quelqun au poste ce soir");
-    await leo("léo, garde de nuit ss-b. jai cru que jallais encore faire la ronde tout seul comme mardi");
-    await reply(60000);
+    await leo(C("léo, garde de nuit ss-b. jai cru que jallais encore faire la ronde tout seul comme mardi", "léo, garde de nuit ss-b"));
+    await reply(C(60000, 45000));
     await leo("enchanté {P}");
-    await leo("par contre je te préviens leur café du distributeur a un goût de liquide vaisselle et il fait genre 12 degrés en bas");
+    if (!S.court) await leo("par contre je te préviens leur café du distributeur a un goût de liquide vaisselle et il fait genre 12 degrés en bas");
     await leo("ma copine inès finit sa garde aux urgences à 6h jlui ai promis les croissants donc faut que je tienne");
-    await leo("ils tont prévenu que cam 02 saute toutes les dix minutes ? karim devait passer voir ça avant de partir mais bon");
-    await reply(30000);
-    await sleep(4000);
+    await leo(C("ils tont prévenu que cam 02 saute toutes les dix minutes ? karim devait passer voir ça avant de partir mais bon", "et cam 02 saute toutes les dix minutes, karim devait passer voir ça mais bon"));
+    await reply(C(30000, 20000));
+    await sleep(C(4000, 3000));
     camSet('c1', { off: true }); camSet('c2', { off: true });
     await journal('CAM 01 · CAM 02 · signal perdu');
-    await sleep(3000);
-    await leo("ok bon bah super");
-    await leo("tu les as encore toi ou tout est passé au noir ?");
-    await reply(60000);
+    await sleep(C(3000, 2000));
+    if (S.court) await leo("ok bon bah super. tout est passé au noir chez toi aussi ?");
+    else { await leo("ok bon bah super"); await leo("tu les as encore toi ou tout est passé au noir ?"); }
+    await reply(C(60000, 30000));
     await leo('', { audio: 'a0' });
     await sleep(14000);
   },
@@ -139,6 +142,17 @@ const CHAPTERS = [
   /* Ch. 2 — Le couloir (3–6 min) · Piège 2 activé */
   async () => {
     S.flags.p2 = true; save();
+    if (S.court){
+      await sleep(2000);
+      await leo("jsuis au sous sol b, ça pue lhumidité");
+      await sleep(3000);
+      await leo('', { img: 'couloir' });
+      await leo("la porte tout au fond elle est ouverte là non ?");
+      await leo("je te jure que je lai tirée à 20h en prenant ma garde");
+      await reply(45000);
+      await leo("bon jme fais des films. je vais au poste de garde voir qui a badgé ce soir");
+      return;
+    }
     await sleep(14000);
     await leo("jsuis au sous sol b");
     await leo("ça pue lhumidité ici cest fou, on dirait un parking abandonné");
@@ -156,9 +170,9 @@ const CHAPTERS = [
 
   /* Ch. 3 — Journal des badges (É1) · Piège 13 */
   async () => {
-    await sleep(9000);
-    for (let i = 0; i < 3; i++){ await ghostTyping(2600); await sleep(4000); }
-    await sleep(6000);
+    await sleep(C(9000, 5000));
+    for (let i = 0; i < C(3, 2); i++){ await ghostTyping(2600); await sleep(C(4000, 3000)); }
+    await sleep(C(6000, 3000));
     await leo("bon jsuis au poste de garde");
     await leo('', { img: 'registre' });
     await leo("cest le journal des badges de ce soir. toi tu las aussi sur ton poste normalement");
@@ -174,6 +188,11 @@ const CHAPTERS = [
       ],
     });
     S.flags.obsBadges = false; save();
+    if (S.court){
+      await leo("vasseur ?? cest larchiviste qui sest fait virer en septembre");
+      await leo("radié le 12/09. comment il a pu badger à 19h42 avec un badge désactivé");
+      return;
+    }
     await leo("vasseur ??");
     await leo("cest larchiviste qui sest fait virer en septembre");
     await leo("radié le 12/09 cest écrit. comment il a pu badger à 19h42 avec un badge désactivé");
@@ -181,37 +200,40 @@ const CHAPTERS = [
 
   /* Ch. 4 — Les bruits & archive 19h40 · Pièges 6a, 9, 13 */
   async () => {
-    await sleep(6000);
-    await leo("tas lheure toi ? ma montre sest arretée sur 19:40 jsais meme pas quand");
-    await leo("bref");
-    await sleep(9000);
+    await sleep(C(6000, 4000));
+    await leo(C("tas lheure toi ? ma montre sest arretée sur 19:40 jsais meme pas quand", "tas lheure toi ? ma montre sest arretée sur 19:40"));
+    if (!S.court) await leo("bref");
+    await sleep(C(9000, 5000));
     nappe.cut();
     const vc = await leo('', { audio: 'ch4_coups', typingLabel: 'enregistre un audio…' });
     await voiceDone(vc, 40000);        // la photo arrive après le vocal (29 s), pas pendant
-    await sleep(5000);
+    await sleep(C(5000, 3000));
     await leo('', { img: 'vitre_sil', pair: 'vitre_vide' });
     await leo("tu vois quelquun toi ?");
     readMode('hold');
-    const r = await reply(90000);
-    if (r){ markRead(); await sleep(40000); }
+    const r = await reply(C(90000, 60000));
+    if (r){ markRead(); await sleep(C(40000, 15000)); }
     readMode('auto');
-    await leo("pardon jai pas osé bouger");
-    await leo("jtenais le tel contre moi pour pas que lécran éclaire");
-    await sleep(5000);
+    if (S.court) await leo("pardon jai pas osé bouger, jtenais le tel contre moi pour pas que lécran éclaire");
+    else { await leo("pardon jai pas osé bouger"); await leo("jtenais le tel contre moi pour pas que lécran éclaire"); }
+    await sleep(C(5000, 3000));
     await journal('Archive interphone · SS-B · 19:40 · restaurée');
     await addDoc('a1', true);
     nappe.back();
-    await sleep(25000);
+    await sleep(C(25000, 10000));
   },
 
   /* Ch. 5 — Le digicode et la première fêlure (É2 + Caméra active #1) */
   async () => {
-    await leo("il est parti je crois. jentends plus rien");
-    await leo("jai le plan dévacuation au mur devant moi");
+    if (S.court) await leo("il est parti je crois. jai le plan dévacuation devant moi");
+    else { await leo("il est parti je crois. jentends plus rien"); await leo("jai le plan dévacuation au mur devant moi"); }
     await leo('', { img: 'plan' });
     await addDoc('plan', true);
-    await leo("ya une porte arrière dans le local, sur le couloir de service. avec un digicode");
-    await leo("toi tu peux louvrir à distance depuis ton poste non ? le code doit être noté quelque part sur le journal des badges");
+    if (S.court) await leo("ya une porte arrière avec un digicode. tu peux louvrir depuis ton poste, le code doit être sur le journal des badges");
+    else {
+      await leo("ya une porte arrière dans le local, sur le couloir de service. avec un digicode");
+      await leo("toi tu peux louvrir à distance depuis ton poste non ? le code doit être noté quelque part sur le journal des badges");
+    }
     await keypad({
       title: 'PORTE S.12 · ARRIÈRE', sub: 'Commande à distance · opérateur #42',
       code: ['408#', '408'],
@@ -223,9 +245,12 @@ const CHAPTERS = [
     });
     r42('Commande S.12 (408#) – OUVERT (verrou R-9 libéré)');
     await journal('Porte S.12 · ouverture à distance · opérateur #42');
-    await leo("ça a marché");
-    await leo("ok jsuis dans le couloir de service");
-    await leo("cam 02 elle saute mais toi tu peux la forcer non ? dis moi quand cest dégagé et jtraverse");
+    if (S.court) await leo("ça a marché. cam 02 saute, tu peux la forcer ? dis moi quand cest dégagé et jtraverse");
+    else {
+      await leo("ça a marché");
+      await leo("ok jsuis dans le couloir de service");
+      await leo("cam 02 elle saute mais toi tu peux la forcer non ? dis moi quand cest dégagé et jtraverse");
+    }
     const ok = await traversal();
     if (ok){
       await leo("jy vais", { fast: true });
@@ -234,24 +259,29 @@ const CHAPTERS = [
       S.wounds++; save();
       await burst(["putain", "il etait là", "il ma eu au bras jsais pas avec quoi", "jsuis passé mais ça saigne"], 1800);
     }
-    await sleep(27000);
+    await sleep(C(27000, 10000));
     await faux("Je suis passé dans le couloir de service. Tout va bien.");
-    await sleep(10000);
+    await sleep(C(10000, 6000));
     await leo("putain jai cru quil etait juste derriere moi", { fast: true });
-    await leo("mon cœur tape à 200 là attends jreprends mon souffle");
+    if (!S.court) await leo("mon cœur tape à 200 là attends jreprends mon souffle");
   },
 
   /* Ch. 6 — MAINT-104 et l'écran observé (É3) · Pièges 3, 4, 7a */
   async () => {
     S.flags.p3 = true; save();
-    await sleep(6000);
+    await sleep(C(6000, 4000));
     await leo("attends faut que je te dise un truc", { fast: true });
-    await sleep(3500);
+    await sleep(C(3500, 2500));
     deleteLast(); microGlitch();
-    await sleep(6000);
-    await leo("jai rien supprimé moi");
-    await leo("mon tel fait nimporte quoi depuis tout à lheure");
-    await leo("jai été voir dans les réglages du tel de service, regarde");
+    await sleep(C(6000, 4000));
+    if (S.court){
+      await leo("jai rien supprimé moi. mon tel fait nimporte quoi");
+      await leo("regarde les réglages du tel de service");
+    } else {
+      await leo("jai rien supprimé moi");
+      await leo("mon tel fait nimporte quoi depuis tout à lheure");
+      await leo("jai été voir dans les réglages du tel de service, regarde");
+    }
     await leo('', { img: 'gestion' });
     await addDoc('gestion', true);
     await leo("maint-104 cest quoi ce truc ? quelquun a la main sur mon tel là");
@@ -263,15 +293,18 @@ const CHAPTERS = [
         "k-104… cest pas karim ça ?",
       ],
     });
-    await leo("karim ??");
-    await leo("nan attends tu rigoles il ma encore filé un double de badge ce matin en rigolant");
-    await leo("pourquoi il prendrait la main sur mon tel de service à cette heure là…");
-    const p3 = await waitFor(() => S.flags.p3first, 40000);
-    await sleep(p3 ? 20000 : 3000);
+    if (S.court) await leo("karim ?? il ma filé un double de badge ce matin en rigolant… pourquoi il ferait ça");
+    else {
+      await leo("karim ??");
+      await leo("nan attends tu rigoles il ma encore filé un double de badge ce matin en rigolant");
+      await leo("pourquoi il prendrait la main sur mon tel de service à cette heure là…");
+    }
+    const p3 = await waitFor(() => S.flags.p3first, C(40000, 20000));
+    await sleep(p3 ? C(20000, 8000) : 3000);
     await faux("Ce n'est pas grave. Continue comme ça, tu fais très bien ton travail, {P}.");
-    await sleep(12000);
+    await sleep(C(12000, 6000));
     await camReconnect();               // pastille verte : caméra frontale réactivée en silence
-    await sleep(20000);
+    await sleep(C(20000, 10000));
   },
 
   /* Ch. 7 — Noir absolu & CAM 00 (Jump scare #1) · Pièges 4, 5, 9 */
@@ -286,7 +319,7 @@ const CHAPTERS = [
     r42('Contrôle CAM 00 : portrait enregistré');
     archivePortrait(shot, `Archive R-9 · portrait opérateur #42 · ${hms()} · ${S.local} · porte : ${S.porte} (déclaré)`);
     setLeo({ avatar: null });
-    await sleep(15000);
+    await sleep(C(15000, 8000));
     nappe.back();
     camSet('c1', { off: false });
     S.flags.periph = true; save();
@@ -295,9 +328,9 @@ const CHAPTERS = [
 
   /* Ch. 8 — Le corps, la R-9 et le bruit domestique (É4) · Pièges 14, 8a */
   async () => {
-    await sleep(8000);
+    await sleep(C(8000, 4000));
     await leo("jvais voir au fond vers le broyeur");
-    await sleep(5000);
+    await sleep(C(5000, 3000));
     await fakeCrash([
       { text: "tétais où ??" },
       { text: "{P} jai trouvé quelque chose" },
@@ -305,26 +338,27 @@ const CHAPTERS = [
       { text: "ça part du broyeur" },
       { text: "cest lui. cest vasseur" },
     ]);
-    await sleep(9000);
-    await leo("ya des feuilles partout par terre devant le broyeur. jte prends en photo tout ce qui est lisible");
+    await sleep(C(9000, 5000));
+    if (S.court) await leo("ya des feuilles partout devant le broyeur. lis ça stp moi jy arrive pas jai les mains qui tremblent");
+    else await leo("ya des feuilles partout par terre devant le broyeur. jte prends en photo tout ce qui est lisible");
     await addDoc('radiation');
     await addDoc('note');
     await addDoc('supervision');
-    await leo("lis ça stp moi jy arrive pas jai les mains qui tremblent");
+    if (!S.court) await leo("lis ça stp moi jy arrive pas jai les mains qui tremblent");
     await sleep(3000);
     await journal('Relevé #41 · versé au dossier opérateur #42');
     await addDoc('r41', true);
     S.flags.obsR41 = true; save();
-    let done = await waitFor(() => S.flags.p8done, 120000);
-    if (!done){ await journal('Relevé #41 · consultation requise · opérateur #42'); done = await waitFor(() => S.flags.p8done, 60000); }
-    if (done) await sleep(12000);
+    let done = await waitFor(() => S.flags.p8done, C(120000, 60000));
+    if (!done){ await journal('Relevé #41 · consultation requise · opérateur #42'); done = await waitFor(() => S.flags.p8done, C(60000, 30000)); }
+    if (done) await sleep(C(12000, 8000));
     S.flags.obsR41 = false; save();
   },
 
   /* Ch. 9 — Sabotage et appel impossible · Piège 7a */
   async () => {
     await leo("{P} tas lu ? dis moi cest qui");
-    await sabotage("C'est bon, le couloir est calme maintenant. Avance vers la salle 14.", 90000);
+    await sabotage("C'est bon, le couloir est calme maintenant. Avance vers la salle 14.", C(90000, 45000));
     await sleep(1800);
     await leo("attends quoi ?? pk tu me dis daller en 14", { fast: true });
     await sleep(2500);
@@ -335,16 +369,16 @@ const CHAPTERS = [
         [20, () => leo("RACCROCHE IL EST JUSTE DERRIERE LA VITRE", { fast: true })],
       ],
     });
-    await sleep(5000);
+    await sleep(C(5000, 3000));
     await leo("jsais plus qui croire");
-    await sleep(8000);
+    await sleep(C(8000, 4000));
   },
 
   /* Ch. 10 — Les 22 secondes en binaural (Jump scare #2 si raté) */
   async () => {
     await leo("il revient", { fast: true });
-    await leo("ton micro dinterphone il est ouvert de mon côté");
-    await leo("sil entend quoi que ce soit il saura où je suis");
+    if (S.court) await leo("ton micro dinterphone il est ouvert de mon côté, sil entend quoi que ce soit il saura où je suis");
+    else { await leo("ton micro dinterphone il est ouvert de mon côté"); await leo("sil entend quoi que ce soit il saura où je suis"); }
     await sleep(2500);
     const res = await silenceBinaural();
     r42('Silence requis : ' + (res === 'ok' ? 'respecté' : 'rompu'));
@@ -357,19 +391,19 @@ const CHAPTERS = [
       save();
       await sleep(3000);
       await leo("il sest éloigné");
-      await leo("jai cru que mon cœur allait lâcher");
+      if (!S.court) await leo("jai cru que mon cœur allait lâcher");
     }
   },
 
   /* Ch. 11 — La sortie (É5 + Caméra active #2) · Pièges 7b, 12 */
   async () => {
     await sleep(3000);
-    await leo("faut que je sorte dici");
-    await leo("sur le plan ya deux sorties. la grille de la salle 14 ou le quai, salle 3");
-    startChrono(S.flags.silFail ? 240 : 300);
-    showComfort();
+    if (S.court) await leo("faut que je sorte. sur le plan ya la grille de la salle 14 ou le quai, salle 3");
+    else { await leo("faut que je sorte dici"); await leo("sur le plan ya deux sorties. la grille de la salle 14 ou le quai, salle 3"); }
+    startChrono(S.court ? (S.flags.silFail ? 120 : 150) : (S.flags.silFail ? 240 : 300));
+    if (!S.court) showComfort();       // relève courte : pas de bouton Confort opérateur (Piège 7b)
     camSet('c3', { src: 'cam03_sil' }); S.flags.cam03 = 1; save();
-    await sleep(6000);
+    await sleep(C(6000, 4000));
     await faux("Le quai est bloqué de l'extérieur. Le couloir est calme maintenant, tu peux ouvrir la grille de la salle 14, je suis juste devant.");
     await sleep(1200);
     const v = await stolenVoice();
@@ -379,7 +413,7 @@ const CHAPTERS = [
     const r = await choice([
       { label: 'Grille S.14 · salle 14', value: 'G', match: /\b14\b|grille/ },
       { label: 'Quai S.3 · salle 3',     value: 'Q', match: /\b3\b|quai|livraison/ },
-    ], { idle: 45000, hint: "VITE {P} 14 ou le quai" });
+    ], { idle: C(45000, 25000), hint: "VITE {P} 14 ou le quai" });
     S.flags.route = r; save();
     r42('Sortie indiquée au gardien : ' + (r === 'G' ? 'S.14' : 'S.3'));
   },
@@ -402,12 +436,12 @@ const CHAPTERS = [
       const v = await choice([
         { label: 'Sors, vite',                   value: 'out', match: /sors|vas.?y|go|cours|fonce|ouvre/ },
         { label: 'Non. Demi-tour, va au quai',   value: 'Q',   match: /non|quai|demi|retour|pi[eè]ge|attends/ },
-      ], { idle: 40000, hint: "{P} je sors ou pas ??" });
+      ], { idle: C(40000, 20000), hint: "{P} je sors ou pas ??" });
       if (v === 'out') return ending('piege');
       S.flags.leftGrid = true; save();
-      chronoPenalty(50);
+      chronoPenalty(C(50, 25));
       await leo("ok ok jfais demi tour");
-      await sleep(8000);
+      await sleep(C(8000, 4000));
     }
     S.flags.p6b = true; save();
     if (S.wounds === 0){
@@ -438,11 +472,16 @@ const CHAPTERS = [
   /* Ch. 13 — Dehors (É7) · saisie libre, pas de QCM */
   async () => {
     hideComfort();
-    await sleep(6000);
-    await leo("jsuis dehors");
-    await leo("jsuis sur le parking les flics viennent de rentrer par le portail");
-    await leo("jai la feuille R-9 sur moi mais ils me demandent qui a ouvert le sous sol");
-    await leo("dis moi vite je leur donne quel nom ?");
+    await sleep(C(6000, 3000));
+    if (S.court){
+      await leo("jsuis dehors, les flics viennent de rentrer par le portail");
+      await leo("jai la feuille R-9 sur moi mais ils me demandent qui a ouvert le sous sol. je leur donne quel nom ?");
+    } else {
+      await leo("jsuis dehors");
+      await leo("jsuis sur le parking les flics viennent de rentrer par le portail");
+      await leo("jai la feuille R-9 sur moi mais ils me demandent qui a ouvert le sous sol");
+      await leo("dis moi vite je leur donne quel nom ?");
+    }
     let tries = 0;
     while (true){
       const r = await reply(0); const n = norm(r);

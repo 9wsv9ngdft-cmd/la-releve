@@ -284,11 +284,12 @@ const $ = id => document.getElementById(id);
 const QS = new URLSearchParams(location.search);
 const FAST = QS.get('fast') === '1';
 const F = FAST ? 0.06 : 1;                         // ?fast=1 : tout va vite + créneau contourné
+const BONJOUR = QS.get('bonjour') === '1';         // ?bonjour=1 : créneau contourné, vitesse normale
 const KEY = 'la_releve_veille_v25';
 
 let S = load();
 const MEM = { badge: null, segs: null, portrait: null, ambient: null, cam: null, v5: null };   // mémoire vive : jamais sauvegardée
-function blank(){ return { name:'', agree:'', local:'', porte:'', seul:null, started:false, chapter:0, log:[], docs:[], cams:{}, flags:{}, chronoEnd:0, t0:0, ended:null, endedAt:0, leo:{avatar:'',status:'en ligne'}, cp:null, r42:[], r42last:'', absN:0, obsN:0, wounds:0, seq:0 }; }
+function blank(){ return { name:'', agree:'', local:'', porte:'', seul:null, started:false, chapter:0, log:[], docs:[], cams:{}, flags:{}, chronoEnd:0, court:false, t0:0, ended:null, endedAt:0, leo:{avatar:'',status:'en ligne'}, cp:null, r42:[], r42last:'', absN:0, obsN:0, wounds:0, seq:0 }; }
 function load(){ try { return Object.assign(blank(), JSON.parse(localStorage.getItem(KEY)) || {}); } catch(e){ return blank(); } }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
 
@@ -475,12 +476,13 @@ function portal(){
     $('pRes').onclick = resume;
     return;
   }
-  if (!nuit() && !FAST){ W.innerHTML = `<div class="msg"></div>`; W.firstChild.textContent = PORTAIL.horsCreneau; return; }
+  if (!nuit() && !FAST && !BONJOUR){ W.innerHTML = `<div class="msg"></div>`; W.firstChild.textContent = PORTAIL.horsCreneau; return; }
   W.innerHTML = `
   <div class="aff">Affectation : <b>Opérateur #42</b> · Relève du poste #41 (clôture anormale à 23:58 — rupture liaison)</div>
   <fieldset><legend>1. Identification du poste</legend>
     <div class="row"><span>Prénom</span><input type="text" id="fName" maxlength="20" autocomplete="off" /></div>
     <div class="row"><span>Intitulé</span><div class="opts" data-f="agree"><button data-v="e">Opératrice</button><button data-v="">Opérateur</button></div></div>
+    <div class="row"><span>Durée de la relève</span><div class="opts" data-f="court"><button data-v="0">Complète · 45 min</button><button data-v="1">Courte · 20 min</button></div></div>
   </fieldset>
   <fieldset><legend>2. Déclaration de conformité — Travailleur Isolé de Nuit (PTI-N)</legend>
     <div class="row"><span>Local d'exercice actuel</span><div class="opts" data-f="local"><button data-v="Chambre">Chambre</button><button data-v="Salon">Salon</button><button data-v="Bureau">Bureau</button></div></div>
@@ -506,7 +508,7 @@ function portal(){
   <div class="err" id="pErr"></div>
   <div class="val" id="pVal"></div>
   <div class="foot">Système VEILLE · Archives Nord · Tout abandon de poste supérieur à 5 secondes est journalisé.</div>`;
-  const F0 = { agree: null, local: null, porte: null, seul: null };
+  const F0 = { agree: null, local: null, porte: null, seul: null, court: null };
   W.querySelectorAll('.opts').forEach(o => o.querySelectorAll('button').forEach(b => b.onclick = () => {
     o.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); F0[o.dataset.f] = b.dataset.v;
   }));
@@ -523,12 +525,12 @@ function portal(){
   $('pGo').onclick = async () => {
     audioInit();
     const n = $('fName').value.trim();
-    const miss = !n ? 'Prénom' : F0.agree === null ? 'Intitulé' : !F0.local ? "Local d'exercice" : !F0.porte ? 'Accès au local' : F0.seul === null ? 'Situation pendant la garde'
+    const miss = !n ? 'Prénom' : F0.agree === null ? 'Intitulé' : !F0.local ? "Local d'exercice" : !F0.porte ? 'Accès au local' : F0.seul === null ? 'Situation pendant la garde' : F0.court === null ? 'Durée de la relève'
       : [...W.querySelectorAll('.eng')].some(c => !c.checked) ? 'Engagements obligatoires' : !phDone ? "Photo d'identification" : !voDone ? 'Vérification vocale' : '';
     if (miss){ $('pErr').textContent = 'Champ requis : ' + miss + '.'; return; }
     $('pErr').textContent = ''; $('pGo').disabled = true;
     S = blank();
-    S.name = n.charAt(0).toUpperCase() + n.slice(1); S.agree = F0.agree; S.local = F0.local; S.porte = F0.porte; S.seul = F0.seul === '1';
+    S.name = n.charAt(0).toUpperCase() + n.slice(1); S.agree = F0.agree; S.local = F0.local; S.porte = F0.porte; S.seul = F0.seul === '1'; S.court = F0.court === '1';
     S.started = true; S.t0 = Date.now();
     r42('Connexion validée. Clauses PTI-N signées.');
     if (MEM.segs && MEM.segs.some(Boolean)) r42('Empreinte vocale opérateur enregistrée.');
@@ -742,7 +744,7 @@ function terminal(poste, sub, lines, last, { typed = false, onLine = null } = {}
 }
 function r42(text, cls = '', ts = Date.now()){ S.r42.push({ ts, text, cls }); save(); }
 function r42lines(){ return S.r42.slice().sort((a,b) => a.ts - b.ts).map(e => [hms(e.ts), e.text, e.cls]); }
-function rel42(typed){ return terminal('42', `ID : V-042 · Site : SS-B · Relève de nuit · Réf. ${ref()}`, r42lines(), S.r42last || '', { typed }); }
+function rel42(typed){ return terminal('42', `ID : V-042 · Site : SS-B · Relève ${S.court ? 'courte' : 'de nuit'} · Réf. ${ref()}`, r42lines(), S.r42last || '', { typed }); }
 function rel41(typed, onLine){ return terminal('41', 'ID : V-041 · Site : SS-B · Relève de nuit', R41, R41_LAST, { typed, onLine }); }
 function showRel(typed){
   $('relX').textContent = 'VEILLE'; $('relBody').innerHTML = ''; $('relBody').appendChild(rel42(typed)); showOv('rel');
@@ -809,7 +811,7 @@ function ouvreLui(){   // Piège 6b : un ancien message a changé
   let m = S.log.find(x => x.who === 'direct' && x.text === 'Envoie-le.') || S.log.find(x => x.who === 'faux');
   if (!m) return; m.text = 'Ouvre-lui'; save(); rerender(m);
 }
-function observe(text){ if (S.obsN >= 2) return; S.obsN++; S.flags['obs_' + text.slice(0,12)] = 1; save(); journal(text); }
+function observe(text){ if (S.obsN >= 2 || S.court) return; S.obsN++; S.flags['obs_' + text.slice(0,12)] = 1; save(); journal(text); }
 
 /* ---------- caméras ---------- */
 function camKey(c){
@@ -870,7 +872,7 @@ function startChrono(sec){
   if (!S.chronoEnd){ S.chronoEnd = Date.now() + sec * 1000 * F; save(); }
   tick.over = false; relances.forEach(clearTimeout);
   const lines = [["jentends ses pas dépêche toi"], ["il est là", "il est là", "aide moi"]];
-  relances = [90, 180].map((s, i) => setTimeout(() => { if (S.chronoEnd && !S.ended) lines[i].forEach((l, j) => setTimeout(() => push({ who:'leo', text:l }), j * 700)); }, s * 1000 * F));
+  relances = (S.court ? [45, 100] : [90, 180]).map((s, i) => setTimeout(() => { if (S.chronoEnd && !S.ended) lines[i].forEach((l, j) => setTimeout(() => push({ who:'leo', text:l }), j * 700)); }, s * 1000 * F));
 }
 function stopChrono(){ S.chronoEnd = 0; save(); relances.forEach(clearTimeout); tick(); }
 function chronoPenalty(s){ if (S.chronoEnd){ S.chronoEnd -= s * 1000 * F; save(); tick(); } }
@@ -1091,7 +1093,7 @@ function traversal(){
     const hint = setTimeout(() => { if (!flashed){ $('caMsg').textContent = 'Léo : tu vois quoi ?? force la cam'; push({ who:'leo', text:'tu vois quoi ?? force la cam' }); } }, 20000 * Math.max(F, .3));
     const end = ok => { clearTimeout(hint); clearTimeout(to); hideOv('camAct'); done(ok); };
     $('caTop').onclick = () => { push({ who:'player', text:'go' }); end(state() === 'vide'); };
-    const to = setTimeout(() => { push({ who:'leo', text:'jpeux pas rester là jy vais' }); end(false); }, 75000 * Math.max(F, .3));
+    const to = setTimeout(() => { push({ who:'leo', text:'jpeux pas rester là jy vais' }); end(false); }, (S.court ? 45000 : 75000) * Math.max(F, .3));
   });
 }
 
