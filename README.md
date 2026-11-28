@@ -6,7 +6,8 @@ Jeu d'horreur psychologique et d'enquête en temps réel sur smartphone, 100 % a
 - **Créneau :** le portail n'ouvre de relève qu'entre 22:00 et 04:00 (prise de poste conseillée à 23:14).
 - **Tester :** ajouter `?fast=1` à l'adresse (tout va plus vite et le créneau est contourné).
 - **Jouer de jour :** ajouter `?bonjour=1` à l'adresse (créneau contourné, vitesse normale).
-- **Briefing :** avant le portail, un module d'accueil d'environ 1 min (texte seul sur la nappe, bouton « Passer › ») présente le site, Léo et le poste. Il ne se rejoue pas dans le même onglet. Textes dans `histoire.js` (objet `BRIEFING`).
+- **Briefing :** avant le portail, une formation d'environ 1 min (texte seul sur la nappe, plan du sous-sol, qui est qui, bouton « Passer › »). Elle ne se rejoue pas dans le même onglet. Textes dans `histoire.js` (objet `BRIEFING`).
+- **Aides au joueur :** bande des 4 caméras toujours visible en haut du chat ; chaque dossier versé apparaît dans le chat avec « OUVRIR › » ; dossiers « Qui est qui » (`EQUIPE`), plan et « Accès commandés à distance » (`ACCES` : portes, format du code, où chercher, essais) disponibles dès le début.
 - **Relève courte :** au portail, « Durée de la relève » propose la garde complète (45 min) ou courte (20 min). La version courte resserre les dialogues et les attentes, retire le bouton « Confort opérateur » et les lignes Observation, et ramène le chrono final à 2 min 30. Script de référence : `garde_courte_20min_script.md` dans le projet.
 - **Recommencer :** toucher 5 fois « VEILLE » en haut de l'écran (portail, appli ou relevé). Cela efface aussi la mémoire de fin de partie : sans ça, le portail affiche le statut du poste #42 indéfiniment.
 

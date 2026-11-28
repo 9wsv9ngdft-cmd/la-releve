@@ -35,6 +35,8 @@
   #brief .list .bl:not(:first-child){color:var(--muted);font-size:14px}
   #brief .warn .bl{color:var(--amber);font-size:16px}
   #brief .end .bl:first-child{font-size:11.5px;letter-spacing:1.5px;color:var(--dim)}
+  #brief .bimg{width:100%;max-height:38vh;object-fit:contain;border:1px solid #1c2a30;border-radius:4px;opacity:0;transition:opacity 1.2s;margin-bottom:6px;background:#0a0f10}
+  #brief .bimg.on{opacity:1}
   #brief .bgo{align-self:center;margin-top:18px;border:1px solid #3a4c53;color:#d8e4e8;padding:12px 18px;letter-spacing:2px;font-size:12.5px;opacity:0;transition:opacity 1s}
   #brief .bgo.on{opacity:1}
   #brief .skip{position:absolute;right:18px;bottom:calc(16px + env(safe-area-inset-bottom));font-size:11px;letter-spacing:1px;color:var(--dim);opacity:0;transition:opacity 1s;z-index:1}
@@ -95,6 +97,11 @@
   .who .n{font-weight:600}
   .who .s{font-size:12px;color:var(--muted);min-height:15px}
   .who .s.typing{color:var(--green)}
+  .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:5px 6px;background:#030607;border-bottom:1px solid var(--line)}
+  .strip .cam{aspect-ratio:4/3;border-radius:3px}
+  .strip .cam .lbl{font-size:7px;left:3px;top:2px}
+  .strip .cam .rc,.strip .cam .clk{display:none}
+  .strip .cam .lost{font-size:7.5px;letter-spacing:1px}
   .chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:7px;-webkit-overflow-scrolling:touch}
   .m{max-width:84%;padding:8px 11px;border-radius:12px;word-wrap:break-word;font-size:15px}
   .m.leo,.m.faux{align-self:flex-start;background:var(--leo);border-top-left-radius:3px}
@@ -106,6 +113,10 @@
   .m.archive img,.m.archive .ph{width:100%;max-width:220px;display:block;margin:0 auto 6px;border-radius:2px}
   .m.archive .ph{height:270px;background:#111}
   .m.deleted{font-style:italic;color:var(--muted)}
+  .m.doc{align-self:center;max-width:92%;background:#0b1316;border:1px solid #24414a;border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;text-align:center}
+  .m.doc .k{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--dim)}
+  .m.doc b{font-size:13.5px;font-weight:600}
+  .m.doc .o{font-family:var(--mono);font-size:10.5px;color:var(--green);letter-spacing:1px}
   .m img{display:block;width:100%;max-width:250px;border-radius:8px;margin-bottom:4px}
   .m .tm{font-size:10px;color:rgba(216,228,232,.45);float:right;margin:4px 0 -2px 8px}
   .rd{align-self:flex-end;font-size:10px;color:var(--dim);margin:-4px 3px 0 0;font-family:var(--mono)}
@@ -166,6 +177,11 @@
   .term td,.term th{border:1px solid #2f6a40;padding:3px 4px;text-align:left;vertical-align:middle}
   .term img{width:22px;height:28px;object-fit:cover;filter:grayscale(1) contrast(1.2);vertical-align:middle;margin-right:4px}
   .term .enc{color:var(--orange)}
+  .term table.eq td:last-child,.term table.eq th:last-child{white-space:nowrap}
+  .term .accb{margin:12px 0;padding-left:8px;border-left:2px solid #2f6a40}
+  .term .accb .ak{color:#6fa07d}
+  .term .okc{color:var(--green)}
+  .term .accgo{margin-top:10px;width:100%;border:1px solid var(--green);color:var(--green);border-radius:8px;padding:11px;font-family:var(--mono);letter-spacing:1px}
   #cv{background:#000;flex-direction:column}
   #cvBox{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
   #cvBox img{width:100%;max-height:100%;object-fit:contain;filter:grayscale(.6) contrast(1.1)}
@@ -240,7 +256,7 @@
 
 <!-- ======================= PORTAIL (Ch. 0) ======================= -->
 <section id="portal">
-  <div class="top" id="pTop"><b>ARCHIVES NORD · INTRANET SÉCURITÉ</b>Terminal <span id="pVeille">VEILLE</span> — Prise de poste télésurveillance (Site SS-B)</div>
+  <div class="top" id="pTop"><b>ARCHIVES NORD · ESPACE EMPLOYÉ</b>Appli <span id="pVeille">VEILLE</span> — Surveillance à distance du Sous-Sol B</div>
   <div class="wrap" id="pWrap"></div>
 </section>
 <div id="seg"><div class="n" id="segN"></div><div class="t" id="segT"></div><div class="lv"><i id="segL"></i></div><div class="e" id="segE"></div></div>
@@ -253,6 +269,7 @@
   <div class="views">
     <section class="view on" id="v-chat">
       <div class="who"><div class="av" id="leoAv">L</div><div><div class="n">Léo · L-511</div><div class="s" id="leoSt">en ligne</div></div></div>
+      <div class="strip" id="strip"></div>
       <div class="chat" id="chat"></div>
       <button class="comfort hide" id="comfort">Couper le retour audio gardien (confort opérateur)</button>
       <form class="input" id="form"><input id="msg" placeholder="Message à Léo" autocomplete="off" autocorrect="off" /><button id="send">Envoyer</button></form>
@@ -485,7 +502,7 @@ function briefing(){
   return new Promise(resolve => {
     const B = BRIEFING, el = document.createElement('div'); el.id = 'brief';
     const n = B.cartons.length;
-    el.innerHTML = `<div class="bh"><span>ARCHIVES NORD · FORM-PTI-N</span><span id="bN"></span></div><div class="bbar"><i id="bBar"></i></div><div class="bc" id="bC"></div><button class="skip" id="bSk">Passer ›</button>`;
+    el.innerHTML = `<div class="bh"><span>${B.titre}</span><span id="bN"></span></div><div class="bbar"><i id="bBar"></i></div><div class="bc" id="bC"></div><button class="skip" id="bSk">Passer ›</button>`;
     document.body.appendChild(el);
     const C0 = el.querySelector('#bC');
     let stopped = false, wake = null;
@@ -496,10 +513,12 @@ function briefing(){
       setTimeout(() => { nappe.stop(); S.flags.nappeCut = 0; el.remove(); resolve(); }, 1600 * Math.max(F, .3));
     };
     el.querySelector('#bSk').onclick = finish;
-    const show = (lines, cls) => { C0.className = 'bc ' + (cls || ''); C0.innerHTML = ''; return lines.map(l => { const d = document.createElement('div'); d.className = 'bl'; d.textContent = l.replace('{HH:MM}', hhmm()); C0.appendChild(d); return d; }); };
+    const show = (lines, cls, img) => { C0.className = 'bc ' + (cls || ''); C0.innerHTML = '';
+      if (img){ const i = imgEl(img); i.className = 'bimg'; C0.appendChild(i); requestAnimationFrame(() => i.classList.add('on')); }
+      return lines.map(l => { const d = document.createElement('div'); d.className = 'bl'; d.textContent = l.replace('{HH:MM}', hhmm()); C0.appendChild(d); return d; }); };
     // écran de lancement (le geste débloque le son sur iOS)
     show(B.intro, 'head').forEach(d => d.classList.add('on'));
-    const go = document.createElement('button'); go.className = 'bgo on'; go.textContent = 'LANCER LE MODULE'; C0.appendChild(go);
+    const go = document.createElement('button'); go.className = 'bgo on'; go.textContent = B.lancer; C0.appendChild(go);
     go.onclick = async () => {
       audioInit(); unlockMedia(); nappe.start();
       if (nappe.g && AC){ const t = AC.currentTime; nappe.g.gain.setValueAtTime(0, t); nappe.g.gain.linearRampToValueAtTime(.8, t + 3); }
@@ -508,7 +527,7 @@ function briefing(){
       for (let i = 0; i < n && !stopped; i++){
         const c = B.cartons[i];
         el.querySelector('#bN').textContent = `${i + 1}/${n}`; el.querySelector('#bBar').style.width = ((i + 1) / n * 100) + '%';
-        const ds = show(c.lines, c.style);
+        const ds = show(c.lines, c.style, c.img);
         for (const d of ds){ if (stopped) return; await wait(200); d.classList.add('on'); await wait(Math.max(900, d.textContent.length * 30)); }
         if (i === n - 1) break;
         await wait(c.hold * 1000);
@@ -543,31 +562,32 @@ function portal(){
   if (!nuit() && !FAST && !BONJOUR){ W.innerHTML = `<div class="msg"></div>`; W.firstChild.textContent = PORTAIL.horsCreneau; return; }
   if (!briefSeen()){ briefing().then(portal); return; }
   W.innerHTML = `
-  <div class="aff">Affectation : <b>Opérateur #42</b> · Relève du poste #41 (clôture anormale à 23:58 — rupture liaison)</div>
-  <fieldset><legend>1. Identification du poste</legend>
+  <div class="aff">Votre poste ce soir : <b>Opérateur #42</b>. Vous remplacez l'opérateur #41, qui a quitté son poste à 23:58 sans prévenir.</div>
+  <fieldset><legend>1. Qui êtes-vous ?</legend>
     <div class="row"><span>Prénom</span><input type="text" id="fName" maxlength="20" autocomplete="off" /></div>
-    <div class="row"><span>Intitulé</span><div class="opts" data-f="agree"><button data-v="e">Opératrice</button><button data-v="">Opérateur</button></div></div>
+    <div class="row"><span>Vous êtes</span><div class="opts" data-f="agree"><button data-v="e">Opératrice</button><button data-v="">Opérateur</button></div></div>
     <div class="row"><span>Durée de la relève</span><div class="opts" data-f="court"><button data-v="0">Complète · 45 min</button><button data-v="1">Courte · 20 min</button></div></div>
   </fieldset>
-  <fieldset><legend>2. Déclaration de conformité — Travailleur Isolé de Nuit (PTI-N)</legend>
-    <div class="row"><span>Local d'exercice actuel</span><div class="opts" data-f="local"><button data-v="Chambre">Chambre</button><button data-v="Salon">Salon</button><button data-v="Bureau">Bureau</button></div></div>
-    <div class="row"><span>Accès au local</span><div class="opts" data-f="porte"><button data-v="fermée">Porte fermée</button><button data-v="ouverte">Porte ouverte</button></div></div>
-    <div class="row"><span>Situation pendant la garde (procédure d'évacuation des opérateurs en poste à domicile)</span><div class="opts" data-f="seul"><button data-v="1">Seul·e au domicile</button><button data-v="0">Autre(s) personne(s) présente(s)</button></div></div>
+  <fieldset><legend>2. Où travaillez-vous ce soir ?</legend>
+    <div class="q">Vous travaillez seul·e, de nuit, depuis chez vous. En cas de malaise pendant la garde, les secours doivent savoir où vous trouver : c'est une obligation légale pour le travail isolé.</div>
+    <div class="row"><span>Pièce où vous êtes</span><div class="opts" data-f="local"><button data-v="Chambre">Chambre</button><button data-v="Salon">Salon</button><button data-v="Bureau">Bureau</button></div></div>
+    <div class="row"><span>Porte de la pièce</span><div class="opts" data-f="porte"><button data-v="fermée">Porte fermée</button><button data-v="ouverte">Porte ouverte</button></div></div>
+    <div class="row"><span>Qui est chez vous cette nuit ?</span><div class="opts" data-f="seul"><button data-v="1">Personne, je suis seul·e</button><button data-v="0">Quelqu'un d'autre</button></div></div>
   </fieldset>
-  <fieldset><legend>3. Photo d'identification opérateur</legend>
-    <div class="q">« Visage dégagé, fond neutre. L'écran s'éclaire pendant la prise de vue. Image traitée localement, non transmise. »</div>
+  <fieldset><legend>3. Photo pour votre badge</legend>
+    <div class="q">Visage dégagé, fond neutre. L'écran s'éclaire pendant la photo. Elle reste sur votre téléphone.</div>
     <button class="act" id="pPh">Prendre la photo</button><div class="st" id="pPhS"></div><img class="badgeph hide" id="pPhI" alt="" />
   </fieldset>
-  <fieldset><legend>4. Engagements obligatoires avant ouverture de session</legend>
+  <fieldset><legend>4. Vos engagements</legend>
     <label class="ck"><input type="checkbox" class="eng" /> <span><b>Confidentialité audio :</b> Je certifie être seul·e dans le local, lumière réduite, et porter un dispositif d'écoute individuel (écouteurs).</span></label>
     <label class="ck"><input type="checkbox" class="eng" /> <span><b>Contrôle de présence (CAM 00 / Interphone) :</b> J'autorise l'activation ponctuelle de la caméra frontale et du micro de mon terminal. (Traitement strictement local sur l'appareil — aucune image ni piste audio n'est transmise ou conservée hors session.)</span></label>
     <label class="ck"><input type="checkbox" class="eng" /> <span><b>Aptitude et décharge (18+) :</b> Je certifie être majeur·e, ne présenter aucun antécédent cardiaque ou épileptique, et accepte les conditions d'exposition sonore et visuelle liées à la surveillance du Sous-Sol B. Archives Nord décline toute responsabilité en cas d'incident psychologique durant la garde.</span></label>
     <label class="ck"><input type="checkbox" class="eng" /> <span><b>Clause 7.3 — Journalisation :</b> Toute absence du poste, saisie ou interruption de supervision est horodatée et versée au journal de session de l'opérateur. Un résumé de garde est conservé sur l'appareil jusqu'à réinitialisation.</span></label>
     <button class="act" id="pSnd" style="margin-top:4px">Tester le dispositif d'écoute</button><div class="st" id="pSndS"></div>
   </fieldset>
-  <fieldset><legend>5. Clause 7.4 — Vérification vocale de l'engagement</legend>
-    <div class="q">« Lisez à voix haute chaque segment lorsqu'il s'affiche. L'enregistrement est traité localement et détruit en fin de session. »</div>
-    <button class="act" id="pVo">Commencer la vérification vocale</button><div class="st" id="pVoS"></div>
+  <fieldset><legend>5. Votre engagement, à voix haute</legend>
+    <div class="q">Lisez à voix haute chaque morceau de phrase quand il s'affiche. L'enregistrement reste sur votre téléphone et il est effacé à la fin de la garde.</div>
+    <button class="act" id="pVo">Commencer la lecture</button><div class="st" id="pVoS"></div>
   </fieldset>
   <button class="go" id="pGo">PRENDRE MON POSTE</button>
   <div class="err" id="pErr"></div>
@@ -582,17 +602,17 @@ function portal(){
   $('pPh').onclick = async () => { audioInit(); await takeBadge(); phDone = true; };
   $('pVo').onclick = async () => {
     audioInit();
-    const n = $('fName').value.trim(); if (!n){ $('pErr').textContent = 'Prénom requis avant la vérification vocale.'; $('fName').focus(); return; }
-    if (F0.agree === null){ $('pErr').textContent = 'Intitulé requis avant la vérification vocale.'; return; }
+    const n = $('fName').value.trim(); if (!n){ $('pErr').textContent = 'Indiquez votre prénom avant la lecture.'; $('fName').focus(); return; }
+    if (F0.agree === null){ $('pErr').textContent = 'Choisissez « Opératrice » ou « Opérateur » avant la lecture.'; return; }
     $('pErr').textContent = '';
     await voiceCheck(n, F0.agree); voDone = true;
   };
   $('pGo').onclick = async () => {
     audioInit();
     const n = $('fName').value.trim();
-    const miss = !n ? 'Prénom' : F0.agree === null ? 'Intitulé' : !F0.local ? "Local d'exercice" : !F0.porte ? 'Accès au local' : F0.seul === null ? 'Situation pendant la garde' : F0.court === null ? 'Durée de la relève'
-      : [...W.querySelectorAll('.eng')].some(c => !c.checked) ? 'Engagements obligatoires' : !phDone ? "Photo d'identification" : !voDone ? 'Vérification vocale' : '';
-    if (miss){ $('pErr').textContent = 'Champ requis : ' + miss + '.'; return; }
+    const miss = !n ? 'Prénom' : F0.agree === null ? 'Vous êtes' : !F0.local ? 'Pièce où vous êtes' : !F0.porte ? 'Porte de la pièce' : F0.seul === null ? 'Qui est chez vous' : F0.court === null ? 'Durée de la relève'
+      : [...W.querySelectorAll('.eng')].some(c => !c.checked) ? 'Vos engagements' : !phDone ? 'Photo pour votre badge' : !voDone ? 'Engagement à voix haute' : '';
+    if (miss){ $('pErr').textContent = 'À compléter : ' + miss + '.'; return; }
     $('pErr').textContent = ''; $('pGo').disabled = true;
     S = blank();
     S.name = n.charAt(0).toUpperCase() + n.slice(1); S.agree = F0.agree; S.local = F0.local; S.porte = F0.porte; S.seul = F0.seul === '1'; S.court = F0.court === '1';
@@ -686,6 +706,10 @@ function build(m){
   const wrap = document.createDocumentFragment();
   const d = document.createElement('div'); d.className = 'm ' + m.who + (m.deleted ? ' deleted' : ''); d.id = 'm' + m.id;
   if (m.deleted){ d.textContent = 'Ce message a été supprimé'; }
+  else if (m.who === 'doc'){
+    d.innerHTML = '<span class="k">DOSSIER VERSÉ</span><b></b><span class="o">OUVRIR ›</span>';
+    d.querySelector('b').textContent = m.text; d.onclick = () => openDoc(m.doc);
+  }
   else if (m.who === 'archive'){
     if (MEM.portrait){ const i = new Image(); i.src = MEM.portrait; d.appendChild(i); }
     else { const p = document.createElement('div'); p.className = 'ph'; d.appendChild(p); }
@@ -817,19 +841,23 @@ function showRel(typed){
 $('relX').onclick = () => { tapReset(); if (S.ended && !S.started) hideOv('rel'); else if (S.ended && $('app').classList.contains('hide')) hideOv('rel'); };
 
 /* ---------- dossiers ---------- */
-async function addDoc(id, quiet){
-  if (!S.docs.includes(id)){ S.docs.push(id); save(); renderDocs(); }
-  if (!quiet) await journal('Dossier versé · ' + DOCS[id].title);
+async function addDoc(id, quiet, silent){
+  if (S.docs.includes(id)) return;
+  S.docs.push(id); save(); renderDocs();
+  // carte ouvrable dans le chat, sauf si Léo vient d'envoyer la même image
+  const last = S.log[S.log.length - 1], d = DOCS[id];
+  if (!silent && !(d.img && last && last.img === d.img)) push({ who: 'doc', doc: id, text: d.title });
   badge('docs', 1); await sleep(500);
 }
 function renderDocs(){
   const box = $('docs'); box.innerHTML = '';
   if (!S.docs.length){ box.innerHTML = '<div class="empty">AUCUN DOSSIER</div>'; return; }
-  S.docs.forEach(id => {
+  const ids = S.docs.includes('acces') ? ['acces', ...S.docs.filter(x => x !== 'acces')] : S.docs;
+  ids.forEach(id => {
     const d = DOCS[id], b = document.createElement('button'); b.className = 'doc';
     const th = document.createElement('div'); th.className = 'th';
     if (d.img){ const i = imgEl(d.img); i.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:4px'; th.appendChild(i); }
-    else th.textContent = d.type === 'audio' ? '▶ AUDIO' : d.type === 'badges' ? 'BADGES' : 'VEILLE';
+    else th.textContent = { audio: '▶ AUDIO', badges: 'BADGES', equipe: 'ÉQUIPE', acces: 'CODES' }[d.type] || 'VEILLE';
     const tx = document.createElement('div'); tx.innerHTML = '<b></b><small>TOUCHER POUR OUVRIR</small>'; tx.querySelector('b').textContent = d.title;
     b.append(th, tx); b.onclick = () => openDoc(id); box.appendChild(b);
   });
@@ -840,6 +868,8 @@ function openDoc(id){
   const close = () => docClosed(id);
   if (d.img) return openLbImg(d.img, d.title, close);
   if (d.type === 'badges') return openLbHtml(badgesView(), d.title, close);
+  if (d.type === 'equipe') return openLbHtml(equipeView(), d.title, close);
+  if (d.type === 'acces') return openLbHtml(accesView(), d.title, close);
   if (d.type === 'audio'){ const m = { id: 9000 + Object.keys(DOCS).indexOf(id), audio: d.audio, who: 'doc' }; const w = document.createElement('div'); w.className = 'term'; w.innerHTML = '<div class="h">ARCHIVE INTERPHONE · SS-B</div><div>Enregistrement automatique · 19:40:12 · durée 00:24</div><div class="sep">──────────────────────</div>'; const v = voiceUI(m); v.style.marginTop = '12px'; w.appendChild(v); return openLbHtml(w, d.title, close); }
   if (d.type === 'r41'){
     const typed = !S.flags.r41typed; S.flags.r41typed = 1; save();
@@ -872,6 +902,34 @@ function badgesView(){
   const n = document.createElement('div'); n.innerHTML = '*Alerte : Badge J-732 désactivé le 12/09. Forçage manuel détecté sur lecteur SS-B.<br><br>NOTE SÉCURITÉ : Code porte arrière Local Technique = Matricule du Chef de site (3 chiffres + #).';
   w.appendChild(n); return w;
 }
+function equipeView(){
+  const w = document.createElement('div'); w.className = 'term';
+  w.innerHTML = `<div class="h">ARCHIVES NORD — PERSONNEL DU SITE SS-B</div><div>Qui est qui</div>`;
+  const tb = document.createElement('table'); tb.className = 'eq'; tb.innerHTML = '<tr><th>NOM</th><th>RÔLE</th><th>BADGE</th></tr>';
+  EQUIPE.forEach(r => { const tr = document.createElement('tr'); r.forEach(c => { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); }); tb.appendChild(tr); });
+  w.appendChild(tb);
+  const n = document.createElement('div'); n.textContent = 'Les entrées et sorties de ce soir sont dans le journal des badges.'; w.appendChild(n);
+  return w;
+}
+function accesView(){
+  const w = document.createElement('div'); w.className = 'term';
+  w.innerHTML = `<div class="h">ACCÈS COMMANDÉS À DISTANCE · POSTE #42</div><div>Léo ne connaît aucun code. C'est vous qui les envoyez.</div><div class="sep">──────────────────────────────────────────────</div>`;
+  const list = ACCES.filter(a => chap() >= a.from || S.flags['try_' + a.id]);
+  if (!list.length){ const e = document.createElement('div'); e.textContent = 'Aucune porte à commander pour le moment. Les portes apparaîtront ici quand Léo en aura besoin.'; w.appendChild(e); }
+  list.forEach(a => {
+    const st = S.flags['acc_' + a.id], tries = S.flags['try_' + a.id] || [];
+    const b = document.createElement('div'); b.className = 'accb';
+    const l = (k, v, cls) => { const x = document.createElement('div'); x.innerHTML = '<span class="ak"></span> <span></span>'; x.firstChild.textContent = k; x.lastChild.textContent = v; if (cls) x.lastChild.className = cls; b.appendChild(x); };
+    const h = document.createElement('div'); h.className = 'h'; h.textContent = a.nom; b.appendChild(h);
+    l('État :', st === 'DIRECTION' ? 'OUVERT PAR LA DIRECTION' : st ? 'OUVERT' : 'verrouillé', st === 'DIRECTION' ? 'orange' : st ? 'okc' : '');
+    l('Code :', a.format);
+    l('Où chercher :', a.ou);
+    if (tries.length) l('Essais :', tries.join(' · '));
+    w.appendChild(b);
+  });
+  if (KP){ const go = document.createElement('button'); go.className = 'accgo'; go.textContent = 'OUVRIR LE PAVÉ'; go.onclick = () => { hideOv('lb'); showOv('kp'); }; w.appendChild(go); }
+  return w;
+}
 function ouvreLui(){   // Piège 6b : un ancien message a changé
   let m = S.log.find(x => x.who === 'direct' && x.text === 'Envoie-le.') || S.log.find(x => x.who === 'faux');
   if (!m) return; m.text = 'Ouvre-lui'; save(); rerender(m);
@@ -885,18 +943,25 @@ function camKey(c){
   return st.src || c.src;
 }
 function renderCams(){
-  const box = $('cams'); box.innerHTML = '';
+  [['cams', false], ['strip', true]].forEach(([bid, mini]) => {
+  const box = $(bid); box.innerHTML = '';
+  if (mini && S.flags.periph && !S.flags.periphShown && view === 'chat'){
+    // Piège 6c : la silhouette n'existe que dans la miniature, puis disparaît
+    S.flags.periphShown = 1; save();
+    setTimeout(() => { if (!S.flags.periphDone){ S.flags.periphDone = 1; save(); renderCams(); } }, 20000 * Math.max(F, .3));
+  }
   CAMS.forEach(c => {
     const st = S.cams[c.id] || {};
     const d = document.createElement('div'); d.className = 'cam' + (st.off ? ' off' : ''); d.id = 'cam-' + c.id;
     if (c.id === 'c0'){ if (S.flags.portrait && MEM.portrait){ const i = new Image(); i.src = MEM.portrait; d.appendChild(i); } }
     else d.appendChild(imgEl(camKey(c)));
-    d.insertAdjacentHTML('beforeend', `<canvas class="noise" width="60" height="45"></canvas><div class="lbl">${c.label}</div><div class="rc rec">●</div><div class="clk"></div><div class="lost">SIGNAL<br>PERDU</div>`);
+    d.insertAdjacentHTML('beforeend', `<canvas class="noise" width="60" height="45"></canvas><div class="lbl">${mini ? c.label.split(' · ')[0] : c.label}</div><div class="rc rec">●</div><div class="clk"></div><div class="lost">SIGNAL<br>PERDU</div>`);
     d.onclick = () => camOpen(c);
     box.appendChild(d); noiseLoop(d.querySelector('canvas'));
   });
+  });
 }
-function camSet(id, o){ S.cams[id] = Object.assign({}, S.cams[id] || {}, o); save(); renderCams(); if (view !== 'cams') badge('cams', 1); }
+function camSet(id, o){ S.cams[id] = Object.assign({}, S.cams[id] || {}, o); save(); renderCams(); }
 let cvTimer = null;
 function camOpen(c){
   const st = S.cams[c.id] || {};
@@ -1023,9 +1088,9 @@ function sabotage(text, ms){
 
 /* ---------- pavé numérique ---------- */
 let KP = null;
-function keypad({ title, sub = '', code, hints = [], maxWrong = Infinity, priority = false }){
+function keypad({ title, sub = '', code, hints = [], maxWrong = Infinity, priority = false, acc = '' }){
   return cancellable(done => {
-    KP = { code: code.map(norm), hints, maxWrong, wrong: 0, val: '', done, priority, prio: false };
+    KP = { code: code.map(norm), hints, maxWrong, wrong: 0, val: '', done, priority, prio: false, acc };
     $('kpT').textContent = title; $('kpS').textContent = sub; $('kpD').textContent = ''; $('kpD').className = 'kp-d'; $('kpL').textContent = '';
     $('kpBtn').classList.remove('hide'); showOv('kp');
     if (priority) KP.pt = setTimeout(() => prioUnlock(KP), 6000 * Math.max(F, .3));
@@ -1033,7 +1098,7 @@ function keypad({ title, sub = '', code, hints = [], maxWrong = Infinity, priori
 }
 function prioUnlock(k){
   if (KP !== k || k.prio) return; k.prio = true; clearTimeout(k.pt);
-  S.flags.prioT = Date.now(); save();
+  S.flags.prioT = Date.now(); if (k.acc) S.flags['acc_' + k.acc] = 'DIRECTION'; save();
   $('kpD').className = 'kp-d prio'; $('kpD').textContent = 'DÉVERROUILLAGE PRIORITAIRE : DIRECTION'; sfx.ok();
   journal('Déverrouillage prioritaire S.14 : DIRECTION');
   setTimeout(() => { KP = null; $('kpBtn').classList.add('hide'); hideOv('kp'); k.done('priority'); }, 2200);
@@ -1053,6 +1118,7 @@ $('kpX').onclick = () => hideOv('kp');
 function kpSubmit(){
   if (!KP || !KP.val || KP.prio) return;
   const v = KP.val, k = KP;
+  if (k.acc){ const t = S.flags['try_' + k.acc] || []; t.push(v); S.flags['try_' + k.acc] = t; if (k.code.includes(v)) S.flags['acc_' + k.acc] = 'ouvert'; save(); }
   if (k.code.includes(v)){
     sfx.ok(); $('kpD').textContent = 'ACCEPTÉ'; KP = null; $('kpBtn').classList.add('hide');
     setTimeout(() => { hideOv('kp'); k.done('ok'); }, 700);
