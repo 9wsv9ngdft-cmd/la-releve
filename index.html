@@ -22,6 +22,24 @@
   input{font:inherit;font-size:16px;color:var(--text)}
   .hide{display:none!important}
 
+  /* ---------- briefing d'accueil (avant le portail) ---------- */
+  #brief{position:fixed;inset:0;z-index:60;background:#030506;color:#c9d6db;font-family:var(--mono);display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 22px calc(18px + env(safe-area-inset-bottom))}
+  #brief::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+  #brief .bh{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:1.5px;color:var(--dim)}
+  #brief .bbar{height:2px;background:#11191d;margin-top:8px;overflow:hidden}#brief .bbar i{display:block;height:100%;width:0;background:#4f6168;transition:width .6s}
+  #brief .bc{flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;max-width:520px;margin:0 auto;width:100%}
+  #brief .bl{font-size:15px;line-height:1.5;opacity:0;transform:translateY(4px);transition:opacity .9s,transform .9s}
+  #brief .bl.on{opacity:1;transform:none}
+  #brief .bc.out .bl{opacity:0;transition:opacity .7s}
+  #brief .head .bl:first-child{font-size:12px;letter-spacing:3px;color:var(--muted)}
+  #brief .list .bl:not(:first-child){color:var(--muted);font-size:14px}
+  #brief .warn .bl{color:var(--amber);font-size:16px}
+  #brief .end .bl:first-child{font-size:11.5px;letter-spacing:1.5px;color:var(--dim)}
+  #brief .bgo{align-self:center;margin-top:18px;border:1px solid #3a4c53;color:#d8e4e8;padding:12px 18px;letter-spacing:2px;font-size:12.5px;opacity:0;transition:opacity 1s}
+  #brief .bgo.on{opacity:1}
+  #brief .skip{position:absolute;right:18px;bottom:calc(16px + env(safe-area-inset-bottom));font-size:11px;letter-spacing:1px;color:var(--dim);opacity:0;transition:opacity 1s;z-index:1}
+  #brief .skip.on{opacity:1}
+
   /* ---------- portail (Ch. 0) ---------- */
   #portal{position:fixed;inset:0;overflow-y:auto;background:#e9ecee;color:#1d2327;font:14px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;z-index:30;-webkit-overflow-scrolling:touch}
   #portal .top{background:#23343d;color:#dfe7ea;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;font-family:var(--mono);font-size:11.5px;letter-spacing:1px}
@@ -459,6 +477,52 @@ function voiced(x, sr){  // renvoie [début, fin] (échantillons) de la parole
 }
 
 /* =========================================================
+   BRIEFING D'ACCUEIL (avant le portail) · texte seul sur la nappe
+   ========================================================= */
+function briefSeen(){ try { return sessionStorage.getItem('la_releve_brief') === '1'; } catch(e){ return false; } }
+function briefDone(){ try { sessionStorage.setItem('la_releve_brief', '1'); } catch(e){} }
+function briefing(){
+  return new Promise(resolve => {
+    const B = BRIEFING, el = document.createElement('div'); el.id = 'brief';
+    const n = B.cartons.length;
+    el.innerHTML = `<div class="bh"><span>ARCHIVES NORD · FORM-PTI-N</span><span id="bN"></span></div><div class="bbar"><i id="bBar"></i></div><div class="bc" id="bC"></div><button class="skip" id="bSk">Passer ›</button>`;
+    document.body.appendChild(el);
+    const C0 = el.querySelector('#bC');
+    let stopped = false, wake = null;
+    const wait = ms => new Promise(r => { const t = setTimeout(r, ms * F); wake = () => { clearTimeout(t); r(); }; });
+    const finish = () => {
+      if (stopped) return; stopped = true; if (wake) wake(); briefDone();
+      if (nappe.g && AC){ const t = AC.currentTime; nappe.g.gain.cancelScheduledValues(t); nappe.g.gain.setValueAtTime(nappe.g.gain.value, t); nappe.g.gain.linearRampToValueAtTime(0, t + 1.5); }
+      setTimeout(() => { nappe.stop(); S.flags.nappeCut = 0; el.remove(); resolve(); }, 1600 * Math.max(F, .3));
+    };
+    el.querySelector('#bSk').onclick = finish;
+    const show = (lines, cls) => { C0.className = 'bc ' + (cls || ''); C0.innerHTML = ''; return lines.map(l => { const d = document.createElement('div'); d.className = 'bl'; d.textContent = l.replace('{HH:MM}', hhmm()); C0.appendChild(d); return d; }); };
+    // écran de lancement (le geste débloque le son sur iOS)
+    show(B.intro, 'head').forEach(d => d.classList.add('on'));
+    const go = document.createElement('button'); go.className = 'bgo on'; go.textContent = 'LANCER LE MODULE'; C0.appendChild(go);
+    go.onclick = async () => {
+      audioInit(); unlockMedia(); nappe.start();
+      if (nappe.g && AC){ const t = AC.currentTime; nappe.g.gain.setValueAtTime(0, t); nappe.g.gain.linearRampToValueAtTime(.8, t + 3); }
+      C0.classList.add('out'); await wait(900);
+      setTimeout(() => !stopped && el.querySelector('#bSk').classList.add('on'), 2500);
+      for (let i = 0; i < n && !stopped; i++){
+        const c = B.cartons[i];
+        el.querySelector('#bN').textContent = `${i + 1}/${n}`; el.querySelector('#bBar').style.width = ((i + 1) / n * 100) + '%';
+        const ds = show(c.lines, c.style);
+        for (const d of ds){ if (stopped) return; await wait(200); d.classList.add('on'); await wait(Math.max(900, d.textContent.length * 30)); }
+        if (i === n - 1) break;
+        await wait(c.hold * 1000);
+        C0.classList.add('out'); await wait(800);
+      }
+      if (stopped) return;
+      el.querySelector('#bSk').classList.remove('on');
+      const ok = document.createElement('button'); ok.className = 'bgo'; ok.textContent = B.bouton; C0.appendChild(ok);
+      requestAnimationFrame(() => ok.classList.add('on')); ok.onclick = finish;
+    };
+  });
+}
+
+/* =========================================================
    PORTAIL (Ch. 0)
    ========================================================= */
 const nuit = () => { const h = new Date().getHours(); return h >= 22 || h < 4; };
@@ -477,6 +541,7 @@ function portal(){
     return;
   }
   if (!nuit() && !FAST && !BONJOUR){ W.innerHTML = `<div class="msg"></div>`; W.firstChild.textContent = PORTAIL.horsCreneau; return; }
+  if (!briefSeen()){ briefing().then(portal); return; }
   W.innerHTML = `
   <div class="aff">Affectation : <b>Opérateur #42</b> · Relève du poste #41 (clôture anormale à 23:58 — rupture liaison)</div>
   <fieldset><legend>1. Identification du poste</legend>

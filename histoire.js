@@ -96,6 +96,26 @@ const CAMS = [
   { id: 'c3', label: 'CAM 03 · GRILLE S.14',        src: 'cam03_vide' },
 ];
 
+/* Briefing d'accueil (avant le portail) : texte seul, sur la nappe.
+   Chaque carton : lignes affichées l'une après l'autre. hold = secondes de lecture après la dernière ligne. */
+const BRIEFING = {
+  intro: ["MODULE D'ACCUEIL OBLIGATOIRE", "Opérateur de télésurveillance de nuit · Site SS-B", "Durée : 1 min · écouteurs conseillés"],
+  cartons: [
+    { lines: ['ARCHIVES NORD · DIRECTION DE SITE', "Module d'accueil · Travailleur isolé de nuit (PTI-N)", 'Réf. FORM-PTI-N'], hold: 1.5, style: 'head' },
+    { lines: ['Site SS-B · Sous-Sol B.', 'Deux niveaux sous terre. Archives, réserves, local technique.', 'Aucune fenêtre.'], hold: 2 },
+    { lines: ['De 20:00 à 06:00, un seul agent est présent sur place.', 'Gardien de nuit · matricule L-511.'], hold: 2 },
+    { lines: ['Il effectue les rondes.', "Il ne dispose d'aucun code d'accès."], hold: 2 },
+    { lines: ['Les accès sont commandés à distance.', 'Par le poste opérateur.'], hold: 2 },
+    { lines: ['Le poste opérateur, c\'est vous.', 'Opérateur #42 · depuis votre domicile · sur ce terminal.'], hold: 2 },
+    { lines: ['Vous disposez :', "· de l'interphone écrit avec le gardien", '· des caméras CAM 01 à CAM 03', '· des dossiers du site', '· de la commande à distance des accès'], hold: 2.5, style: 'list' },
+    { lines: ['Le poste #41 a été clôturé à 23:58.', 'Motif : rupture liaison.', 'Le poste est vacant.'], hold: 2 },
+    { lines: ['Consignes de garde.', 'Restez au poste. Toute absence de plus de 5 secondes est journalisée.', 'Lumière réduite. Écouteurs. Seul·e dans la pièce.'], hold: 2 },
+    { lines: ["Ne déverrouillez aucun accès sans autorisation de la Direction."], hold: 4, style: 'warn' },
+    { lines: ['Fin du module · {HH:MM}', 'Complétez votre dossier de prise de poste.'], hold: 0, style: 'end' },
+  ],
+  bouton: 'ACCÉDER AU DOSSIER',
+};
+
 /* Hors créneau et persistance (portail) */
 const PORTAIL = {
   horsCreneau: 'Aucune relève disponible. Prochaine prise de poste : 22:00.',
